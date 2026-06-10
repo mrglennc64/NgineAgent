@@ -1,0 +1,8 @@
+claim_id,payer,denial_code,rarc_code,provider_npi,date_of_service,cpt_code,icd10_code,modifier,billed_amount,paid_amount
+ACME-2025-44128,Aetna Demonstration Health Plans,CO-16,M51,1234567890,2025-04-12,99213,J02.9,,185.00,0.00
+ACME-2025-44129,Aetna Demonstration Health Plans,CO-16,M51,1234567890,2025-04-12,96372,Z23,,45.00,0.00
+MCR-2025-90011,Medicare Demonstration Administrative Contractor,CO-50,,1987654320,2025-03-30,97110,M54.5,,120.00,0.00
+BCBS-2025-33210,Blue Demonstration Shield,PR-1,,1029384756,2025-05-02,99214,E11.9,25,210.00,0.00
+UHC-2025-77654,United Demonstration Care,CO-97,N130,,2025-02-18,20610,M17.11,LT,340.00,0.00
+ACME-2025-44200,Aetna Demonstration Health Plans,CO16,,1234567890,2025-06-01,9921,J45.909,,150.00,0.00
+MCR-2025-90099,Medicare Demonstration Administrative Contractor,,,1987654320,2025-01-09,71045,J18.9,,95.50,0.00

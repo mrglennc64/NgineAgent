@@ -26,10 +26,16 @@ from __future__ import annotations
 
 import argparse
 import json
+import secrets
 import sys
 import time
+import uuid
 from datetime import datetime, timezone
 from pathlib import Path
+
+# Engine version stamped onto every event — matches the deployed engine
+# (Generic Validation/Correction Engine, engine.usesmpt.com).
+ENGINE_VERSION = "0.1.0"
 
 # Vendored real engine — same code that powers CIP / DIP / HeyRoya / Kataloghub
 from ngineagent.engine.detect import detect_issues
@@ -54,10 +60,14 @@ STEP_TIMEOUTS = {
 class RunLogger:
     """Times steps and appends engine.events.v1 records to a JSONL log."""
 
-    def __init__(self, run_id: str, workflow: str, definition: str):
+    def __init__(self, run_id: str, workflow: str, definition: str, session_id: str | None = None):
         self.run_id = run_id
         self.workflow = workflow
         self.definition = definition
+        # Distributed-trace identifiers — a real run is traceable end to end.
+        self.trace_id = uuid.uuid4().hex
+        self.session_id = session_id or ("sess-" + secrets.token_hex(4))
+        self.engine_version = ENGINE_VERSION
         self.t0 = time.perf_counter()
         self.events: list[dict] = []
         self.steps: list[dict] = []
@@ -65,7 +75,10 @@ class RunLogger:
         RUNS_DIR.mkdir(parents=True, exist_ok=True)
         self.log_path = RUNS_DIR / f"{run_id}.jsonl"
         self._fh = self.log_path.open("w", encoding="utf-8")
-        self._emit("engine.run.started", {"def": definition})
+        self._emit("engine.run.started", {
+            "def": definition,
+            "engine_version": self.engine_version,
+        })
 
     def _now_offset_ms(self) -> int:
         return int((time.perf_counter() - self.t0) * 1000)
@@ -76,6 +89,9 @@ class RunLogger:
             "t_ms": self._now_offset_ms(),
             "event": event,
             "run_id": self.run_id,
+            "trace_id": self.trace_id,
+            "session_id": self.session_id,
+            "engine_version": self.engine_version,
             "workflow": self.workflow,
         }
         if extra:
@@ -160,10 +176,10 @@ def _gen_run_id() -> str:
     return "RUN-" + datetime.now().strftime("%Y%m%d-%H%M%S")
 
 
-def run_validation(catalog_path: Path, run_id: str) -> dict:
+def run_validation(catalog_path: Path, run_id: str, session_id: str | None = None) -> dict:
     """parse -> detect -> score -> render. Returns a summary dict."""
     text = catalog_path.read_text(encoding="utf-8")
-    log = RunLogger(run_id, workflow="metadata_validation", definition=catalog_path.name)
+    log = RunLogger(run_id, workflow="metadata_validation", definition=catalog_path.name, session_id=session_id)
 
     with log.step("parse", "Parse catalog CSV") as s:
         # parsing happens inside detect_issues; we measure a cheap line count here
@@ -203,13 +219,13 @@ def run_validation(catalog_path: Path, run_id: str) -> dict:
     }
 
 
-def run_correction(catalog_path: Path, worksheet_path: Path, run_id: str) -> dict:
+def run_correction(catalog_path: Path, worksheet_path: Path, run_id: str, session_id: str | None = None) -> dict:
     """parse -> detect(before) -> apply -> detect(after) -> render(before+after)."""
     text = catalog_path.read_text(encoding="utf-8")
     worksheet = worksheet_path.read_text(encoding="utf-8")
-    log = RunLogger(run_id, workflow="catalog_correction", definition=catalog_path.name)
+    log = RunLogger(run_id, workflow="catalog_correction", definition=catalog_path.name, session_id=session_id)
 
-    with log.step("parse", "Parse catalog + worksheet") as s:
+    with log.step("parse", "Parse catalog CSV") as s:
         rows = [ln for ln in text.replace("\r\n", "\n").split("\n") if ln.strip()]
         wrows = [ln for ln in worksheet.replace("\r\n", "\n").split("\n") if ln.strip()]
         s.metrics["rows_in"] = max(0, len(rows) - 1)

@@ -71,6 +71,9 @@ def load_run(run_id: str) -> dict:
         "workflow": started.get("workflow", "?"),
         "definition": started.get("def", ""),
         "started_ts": started["ts"],
+        "trace_id": started.get("trace_id", ""),
+        "session_id": started.get("session_id", ""),
+        "engine_version": started.get("engine_version", ""),
         "total_ms": completed.get("total_ms", 0),
         "events": events,
         "steps": steps,
@@ -96,6 +99,46 @@ def esc(v) -> str:
 
 
 # ── Section renderers ──────────────────────────────────────────────────────────
+def render_overview() -> str:
+    """§0 — human-readable context. Buyers need to know what they're looking at
+    before the telemetry. Static, accurate prose (no metrics here)."""
+    return f"""
+    <section>
+      <div class="sec-tag">OVERVIEW</div>
+      <h2>What this is</h2>
+      <div class="ov-grid">
+        <div class="ov">
+          <div class="ov-k">Engine</div>
+          <div class="ov-v">Generic Validation &amp; Correction Engine — the metadata
+          compliance engine behind CIP, DIP, HeyRoya and Kataloghub.</div>
+        </div>
+        <div class="ov">
+          <div class="ov-k">What it does</div>
+          <div class="ov-v">Detects and corrects the metadata defects that block a music
+          catalog from CWR submission — across 8 issue types — and scores CWR readiness
+          0–100.</div>
+        </div>
+        <div class="ov">
+          <div class="ov-k">Input</div>
+          <div class="ov-v">A catalog CSV (title, name, role, share %, IPI, society, ISWC,
+          ISRC) and, for correction, a publisher-decision worksheet.</div>
+        </div>
+        <div class="ov">
+          <div class="ov-k">Output</div>
+          <div class="ov-v">A health score + issue list, a corrected/cleaned catalog CSV,
+          and a branded health report — plus the telemetry in this run report.</div>
+        </div>
+        <div class="ov ov-wide">
+          <div class="ov-k">Why it matters</div>
+          <div class="ov-v">Unclean metadata is the #1 cause of rejected CWR filings and
+          mis-routed royalties. This report is generated from real engine runs on real
+          catalogs — the numbers below are measured, not illustrative — so the engine's
+          behaviour is observable, traceable, and auditable end to end.</div>
+        </div>
+      </div>
+    </section>"""
+
+
 def render_exec_summary(runs: list[dict]) -> str:
     total_steps = sum(len(r["steps"]) for r in runs)
     total_retries = sum(r["retries"] for r in runs)
@@ -115,7 +158,9 @@ def render_exec_summary(runs: list[dict]) -> str:
             <span class="badge" style="color:{status_color};border-color:{status_color}">{'COMPLETED' if r['ok'] else 'FAILED'}</span>
           </div>
           <div class="kv"><span>RunId</span><b>{esc(r['run_id'])}</b></div>
+          <div class="kv"><span>TraceId</span><b class="mono">{esc((r['trace_id'] or '')[:16])}</b></div>
           <div class="kv"><span>Definition</span><b>{esc(r['definition'])}</b></div>
+          <div class="kv"><span>Engine</span><b>v{esc(r['engine_version'] or '?')}</b></div>
           <div class="kv"><span>Steps</span><b>{len(r['steps'])}</b></div>
           <div class="kv"><span>Total Duration</span><b>{r['total_ms']}ms</b></div>
           <div class="kv"><span>Critical Path</span><b>{crit}ms (linear chain)</b></div>
@@ -191,7 +236,7 @@ def render_step_table(runs: list[dict]) -> str:
               <td>{esc(r['workflow'])}</td>
               <td class="mono">{esc(s.get('step_id'))}</td>
               <td>{esc(s.get('step_type'))}</td>
-              <td>{esc(s.get('label'))}</td>
+              <td class="label-cell">{esc(s.get('label'))}</td>
               <td class="mono">{s.get('duration_ms',0)}ms</td>
               <td class="mono">{s.get('timeout_ms',0)}ms</td>
               <td class="mono">{ret_disp}</td>
@@ -283,8 +328,13 @@ def render_report(runs: list[dict]) -> str:
     all_ok = all(r["ok"] for r in runs)
     status_pill = f'<span class="pill" style="color:{TEAL}">● All Workflows Completed</span>' if all_ok \
         else f'<span class="pill" style="color:{RED}">● Attention — see step table</span>'
-    body = (render_exec_summary(runs) + render_timeline(runs) + render_step_table(runs)
-            + render_event_stream(runs) + render_perf_metrics(runs))
+    body = (render_overview() + render_exec_summary(runs) + render_timeline(runs)
+            + render_step_table(runs) + render_event_stream(runs) + render_perf_metrics(runs))
+    # header trace chips from the first run (the "real distributed system" signal)
+    sess = runs[0].get("session_id", "")
+    ver = runs[0].get("engine_version", "")
+    trace_chips = (f'<span class="pill" style="color:{INK_MUTED}">session: {esc(sess)}</span>'
+                   f'<span class="pill" style="color:{INK_MUTED}">engine v{esc(ver)}</span>')
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8">
 <title>NgineAgent Run Report</title>
 <style>
@@ -320,9 +370,15 @@ def render_report(runs: list[dict]) -> str:
   .tl-bar {{ position:absolute;top:3px;height:18px;border-radius:4px;display:flex;align-items:center;padding:0 6px;min-width:34px; }}
   .tl-bar span {{ font-size:9px;color:#03110d;font-weight:700;white-space:nowrap; }}
   table {{ width:100%;border-collapse:collapse;font-size:10.5px; }}
-  th {{ text-align:left;color:{TEAL};font-size:9px;letter-spacing:0.5px;text-transform:uppercase;padding:8px 10px;border-bottom:1px solid {BORDER}; }}
-  td {{ padding:8px 10px;border-bottom:1px solid rgba(124,154,144,0.1); }}
+  th {{ text-align:left;color:{TEAL};font-size:9px;letter-spacing:0.5px;text-transform:uppercase;padding:8px 10px;border-bottom:1px solid {BORDER};white-space:nowrap; }}
+  td {{ padding:8px 10px;border-bottom:1px solid rgba(124,154,144,0.1);white-space:nowrap; }}
+  td.label-cell {{ white-space:nowrap;min-width:190px; }}
   .mono {{ font-variant-numeric:tabular-nums; }}
+  .ov-grid {{ display:grid;grid-template-columns:1fr 1fr;gap:14px; }}
+  .ov {{ background:{BG};border:1px solid {BORDER};border-radius:10px;padding:14px 16px; }}
+  .ov-wide {{ grid-column:1 / -1; }}
+  .ov-k {{ font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:{TEAL};margin-bottom:6px; }}
+  .ov-v {{ font-size:12px;color:{INK};line-height:1.55; }}
   .topic {{ font-size:10px;color:{INK_MUTED};margin-bottom:12px; }}
   .stream {{ background:{BG};border:1px solid {BORDER};border-radius:8px;padding:14px;font-size:10px; }}
   .ev {{ display:flex;gap:10px;padding:3px 0;border-bottom:1px solid rgba(124,154,144,0.07); }}
@@ -339,7 +395,7 @@ def render_report(runs: list[dict]) -> str:
       <div class="h-sub">Metadata Validation &amp; Correction Engine — Execution Telemetry</div>
     </div>
   </div>
-  <div class="pills">{status_pill}<span class="pill" style="color:{INK_MUTED}">{esc(gen)}</span><span class="pill" style="color:{INK_MUTED}">Topic: engine.events.v1</span></div>
+  <div class="pills">{status_pill}<span class="pill" style="color:{INK_MUTED}">{esc(gen)}</span>{trace_chips}<span class="pill" style="color:{INK_MUTED}">Topic: engine.events.v1</span></div>
   {body}
   <div class="footer">
     <span>NgineAgent · telemetry derived from real engine runs · no synthetic metrics</span>

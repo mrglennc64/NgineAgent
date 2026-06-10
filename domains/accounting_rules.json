@@ -1,0 +1,32 @@
+{
+  "domain": "accounting",
+  "description": "Accounting/bookkeeping domain rules — BAS account-class map + VAT + double-entry guidance. Modeled on the PerfectBook (bookie) SIE/BAS app. Consumed alongside accounting_schema.json.",
+  "penalties": {
+    "invalid_account": 30,
+    "missing_voucher_date": 20,
+    "unbalanced_voucher": 40,
+    "missing_vat_on_sales": 10
+  },
+  "thresholds": {
+    "clean_ledger_score": 90,
+    "review_score": 70
+  },
+  "bas_account_classes": {
+    "1": "Tillgångar (Assets)",
+    "2": "Eget kapital och skulder (Equity & Liabilities)",
+    "3": "Intäkter (Income)",
+    "4": "Kostnader för varor/material (Cost of goods)",
+    "5": "Övriga externa kostnader (Other external costs)",
+    "6": "Övriga externa kostnader (Other external costs)",
+    "7": "Personalkostnader (Personnel costs)",
+    "8": "Finansiella poster (Financial items)"
+  },
+  "double_entry": {
+    "rule": "Per voucher, sum of debits must equal sum of credits (sum of signed amounts = 0).",
+    "note": "Cross-row balance check is enforced in the PerfectBook app; engine validates row-level format + account validity."
+  },
+  "statute": {
+    "retention_years": 7,
+    "law_citation": "Bokföringslagen (1999:1078) 7 kap."
+  }
+}

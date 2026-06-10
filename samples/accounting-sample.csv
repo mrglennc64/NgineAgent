@@ -1,0 +1,9 @@
+account,amount,voucher_series,voucher_number,voucher_date,description,vat_code
+1930,12500.00,A,1,2026-01-15,Kundinbetalning faktura 1001,NONE
+3001,-10000.00,A,1,2026-01-15,Försäljning,SE25
+2611,-2500.00,A,1,2026-01-15,Utgående moms 25%,SE25
+5010,8000.00,V,2,2026-02-01,Lokalhyra februari,NONE
+1930,-8000.00,V,2,2026-02-01,Betalning hyra,NONE
+301,-5000.00,A,3,2026-02-10,Bad account (3 digits),SE25
+6210,450.00,A,4,,Telefoni utan datum,NONE
+4010,abc,V,5,2026-03-01,Inköp material bad amount,SE25

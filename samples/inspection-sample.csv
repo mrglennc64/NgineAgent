@@ -1,0 +1,7 @@
+protocol_id,notering_id,section,condition,inspector,inspection_date,property_address,ai_match_confidence,validated_by_user,photo_count
+BES-2026-001,N-01,Tak,normalt,Anders Bergstrom,2026-04-12,Storgatan 1 Stockholm,0.92,true,3
+BES-2026-001,N-02,Fasad,under_normalt,Anders Bergstrom,2026-04-12,Storgatan 1 Stockholm,0.71,true,5
+BES-2026-001,N-03,Grund,over_normalt,Anders Bergstrom,2026-04-12,Storgatan 1 Stockholm,0.95,true,2
+BES-2026-001,N-04,Vatten,utmarkt,Anders Bergstrom,2026-04-12,Storgatan 1 Stockholm,0.60,false,0
+BES-2026-001,N-05,El,,Anders Bergstrom,2026-04-12,Storgatan 1 Stockholm,0.88,true,1
+BES-2026-002,N-01,Tak,normalt,Eva Lind,2026/04/20,Kungsgatan 5 Goteborg,0.99,true,4

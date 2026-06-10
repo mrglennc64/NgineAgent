@@ -12,8 +12,25 @@ every domain; `MusicValidator` extends it with royalty-gap + statute logic.
 | **music** | ✅ Production | HeyRoya / Kataloghub | Full: schema + rules + MusicValidator (ISRC/ISWC/IPI/splits, royalty-gap, §507(b) statute). |
 | **healthcare** | ✅ Real (this repo) | Denials (RCM) | Schema modeled on the Denials app data shape — CARC/RARC codes, NPI, CPT, ICD-10, modifiers, claim amounts. Structural + format validation. Denial *reasoning/appeal* lives in the Denials app's LLM routes, not the engine. |
 | **comms / CIP** | ✅ Real (this repo) | CIP | Schema modeled on the CIP app's `Run`/`Job`/`Finding`/`Channel` types — 9 diagnostic channels (audit, seo, funnel, email, deliverability, social, browser, inventory, ivr), `ok/warn/issue` severity, 0-100 score. One row = one channel finding. Scan execution + scoring live in the CIP app; the engine validates the finding rows. |
+| **accounting** | ✅ Real (this repo) | PerfectBook (bookie) | SIE/BAS double-entry ledger rows — 4-digit BAS account, kronor amount (signed debit/credit), voucher series/number/date, VAT codes. `samples/accounting-sample.csv`. |
+| **inspection** | ✅ Real (this repo) | besiktning | Building-inspection protocol findings — `under_normalt/normalt/over_normalt` condition, notering id, inspector, inspection date, AI-confidence + validation gate. `samples/inspection-sample.csv`. |
 | **invoice** | ⚠️ Stub | — | Schema only (invoice_number, issue_date, amount, vendor_id + format checks). No domain rules yet. |
 | **base** | ◻️ Fallback | — | Validates only that the file is non-empty. Default catch-all. |
+
+## Deliberately NOT domains (app-layer, not validation domains)
+
+A repo becomes an engine domain only if it has a distinct **row/record data shape** to
+validate. These were assessed and excluded to avoid domain sprawl/overlap:
+
+- **digital-handshake** — split sheets (already the *music* domain's shape: contributors +
+  shares to 100%) + Letters of Direction. It's a signature/authorization flow, not a new
+  validation domain.
+- **traplawpro** — SoundExchange claim filing. The legal/consumption layer that *uses*
+  rights data and produces documents; not a distinct domain.
+
+These belong in the **"applications built on the platform"** story, not the engine-domains
+list. Five distinct verticals (music, healthcare, comms, accounting, inspection) is a
+stronger, more honest pitch than seven with overlap.
 
 ## Files here
 

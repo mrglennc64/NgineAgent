@@ -1,0 +1,242 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+          color:#16242a; background:#ffffff; }
+  .card { padding:42px 48px; }
+  .cover { background:linear-gradient(180deg,#f5fbfa 0%, #ffffff 55%);
+            min-height:980px; page-break-after:always; border-bottom:1px solid #e6eef0; }
+  .brand { color:#0fb89c; font-weight:700; letter-spacing:.04em; font-size:15px; }
+  h1 { font-size:52px; margin:18px 0 6px; letter-spacing:-.02em; color:#0c1a1f; }
+  .sub { color:#5a6f75; font-size:15px; max-width:680px; line-height:1.5; }
+  code { color:#0b8c77; font-family:Consolas,Menlo,monospace; font-size:.92em; }
+  .kpis { display:flex; gap:18px; margin:34px 0 28px; }
+  .kpi { flex:1; background:#ffffff; border:1px solid #e0e9eb; border-radius:14px; padding:22px;
+          box-shadow:0 1px 3px rgba(16,40,46,.04); }
+  .kpi .num { font-size:40px; font-weight:700; color:#0fb89c; }
+  .kpi .num span { font-size:18px; color:#5aa99c; }
+  .kpi .lab { color:#6b7b80; font-size:13px; margin-top:4px; }
+  .livebox { background:#f7fbfb; border:1px solid #e0e9eb; border-radius:14px; padding:22px 24px; }
+  .live-h { color:#0b8c77; font-size:12px; font-weight:700; letter-spacing:.1em; }
+  .live-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin:16px 0 10px; }
+  .live-grid span { display:block; color:#6b7b80; font-size:12px; }
+  .live-grid b { font-size:20px; color:#0c1a1f; }
+  .live-foot { color:#7a8a8f; font-size:12px; font-family:Consolas,monospace; }
+  .how { color:#5a6f75; font-size:14px; line-height:1.6; margin-top:26px; max-width:720px; }
+  .domain { page-break-inside:avoid; border-top:1px solid #eef3f4; }
+  .dhead h2 { font-size:24px; margin:0 0 4px; color:#0c1a1f; }
+  .dom { color:#0fb89c; font-size:13px; font-family:Consolas,monospace; font-weight:400; }
+  .meta { color:#6b7b80; font-size:13px; }
+  .stats { display:flex; gap:26px; align-items:center; margin:18px 0; }
+  .stat .num { font-size:30px; font-weight:700; color:#0c1a1f; }
+  .stat .lab { color:#6b7b80; font-size:12px; }
+  .stat.tally { display:flex; gap:8px; flex-wrap:wrap; }
+  .pill { font-size:12px; padding:4px 10px; border-radius:20px; border:1px solid; font-weight:600; }
+  .pill.ok { background:#0fb89c1a; color:#0b8c77; border-color:#0fb89c55; }
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th { text-align:left; color:#6b7b80; font-weight:600; font-size:11px; letter-spacing:.06em;
+        text-transform:uppercase; padding:8px 10px; border-bottom:2px solid #e0e9eb; }
+  td { padding:9px 10px; border-bottom:1px solid #eef3f4; vertical-align:top; }
+  td.r { color:#9aa8ac; width:42px; } td.f { width:140px; }
+  .sev { font-weight:700; font-size:12px; }
+  .fix { color:#0b8c77; font-size:12px; margin-top:3px; }
+</style></head><body>
+
+<section class="card cover">
+  <div class="brand">●&nbsp; NgineAgent</div>
+  <h1>Engine Proof Pack</h1>
+  <p class="sub">Real validation results — captured live from the running engine at
+     <code>engine.usesmpt.com</code>. Every figure below is a verbatim engine response;
+     nothing here is illustrative or synthetic.</p>
+  <div class="kpis">
+    <div class="kpi"><div class="num">5</div><div class="lab">live domains</div></div>
+    <div class="kpi"><div class="num">38</div><div class="lab">rows validated</div></div>
+    <div class="kpi"><div class="num">18</div><div class="lab">issues surfaced</div></div>
+    <div class="kpi"><div class="num">10.5<span>ms</span></div><div class="lab">avg validate latency</div></div>
+  </div>
+  <div class="livebox">
+    <div class="live-h">● LIVE ENGINE STATUS</div>
+    <div class="live-grid">
+      <div><span>uptime</span><b>8m 37s</b></div>
+      <div><span>requests served</span><b>9</b></div>
+      <div><span>last request</span><b>14:25:44</b></div>
+      <div><span>health</span><b>ok</b></div>
+    </div>
+    <div class="live-foot">Per-domain calls this session: {&quot;music&quot;: 3, &quot;healthcare&quot;: 1, &quot;comms&quot;: 1, &quot;accounting&quot;: 1, &quot;inspection&quot;: 1}</div>
+  </div>
+  <p class="how">One engine. Five validated verticals. Each domain loads its own schema +
+     rules; the same core scanner enforces required-field and format checks while
+     domain validators add business logic (royalty gaps, double-entry, condition scales).</p>
+</section>
+
+    <section class="card domain">
+      <div class="dhead">
+        <h2>Music rights &amp; royalties <span class="dom">domain=music</span></h2>
+        <div class="meta">Backing product: <b>HeyRoya / Kataloghub</b> &nbsp;·&nbsp; Validates: ISRC, ISWC, IPI, splits, royalty-gap, §507(b) statute</div>
+      </div>
+      <div class="stats">
+        <div class="stat"><div class="num">5</div><div class="lab">rows scanned</div></div>
+        <div class="stat"><div class="num">6</div><div class="lab">issues found</div></div>
+        <div class="stat tally"><span class="pill" style="background:#e0524e22;color:#e0524e;border-color:#e0524e55">3× HIGH</span> <span class="pill" style="background:#6b7b8022;color:#6b7b80;border-color:#6b7b8055">1× LOW</span></div>
+      </div>
+      <table>
+        <thead><tr><th>Row</th><th>Field</th><th>Severity</th><th>Engine finding (verbatim)</th></tr></thead>
+        <tbody>
+        <tr>
+          <td class="r">4</td>
+          <td class="f"><code>isrc</code></td>
+          <td><span class="sev" style="color:#e0524e">HIGH</span></td>
+          <td>Missing value</td>
+        </tr>
+        <tr>
+          <td class="r">2</td>
+          <td class="f"><code>isrc</code></td>
+          <td><span class="sev" style="color:#e0524e">HIGH</span></td>
+          <td>ISRC must be 12 chars: 2-letter country + 3 alphanumeric + 7 digits (e.g. USRC12345678)</td>
+        </tr>
+        <tr>
+          <td class="r">1</td>
+          <td class="f"><code>iswc</code></td>
+          <td><span class="sev" style="color:#e0524e">HIGH</span></td>
+          <td>No ISWC — composition not linked. Mechanical royalties cannot be attributed.<div class="fix">→ Register the composition with a PRO (ASCAP/BMI/SESAC) to obtain an ISWC.</div></td>
+        </tr>
+        <tr>
+          <td class="r">3</td>
+          <td class="f"><code>duration_seconds</code></td>
+          <td><span class="sev" style="color:#6b7b80">LOW</span></td>
+          <td>Short recording: 45s. Some platforms have minimum play time requirements.<div class="fix">→ Confirm track meets platform requirements (&gt;120s recommended).</div></td>
+        </tr></tbody>
+      </table>
+    </section>
+    <section class="card domain">
+      <div class="dhead">
+        <h2>Healthcare claim denials <span class="dom">domain=healthcare</span></h2>
+        <div class="meta">Backing product: <b>Denials (RCM)</b> &nbsp;·&nbsp; Validates: CARC/RARC codes, NPI, CPT, ICD-10, claim amounts</div>
+      </div>
+      <div class="stats">
+        <div class="stat"><div class="num">7</div><div class="lab">rows scanned</div></div>
+        <div class="stat"><div class="num">3</div><div class="lab">issues found</div></div>
+        <div class="stat tally"><span class="pill" style="background:#e0524e22;color:#e0524e;border-color:#e0524e55">3× HIGH</span></div>
+      </div>
+      <table>
+        <thead><tr><th>Row</th><th>Field</th><th>Severity</th><th>Engine finding (verbatim)</th></tr></thead>
+        <tbody>
+        <tr>
+          <td class="r">6</td>
+          <td class="f"><code>denial_code</code></td>
+          <td><span class="sev" style="color:#e0524e">HIGH</span></td>
+          <td>Missing value</td>
+        </tr>
+        <tr>
+          <td class="r">4</td>
+          <td class="f"><code>provider_npi</code></td>
+          <td><span class="sev" style="color:#e0524e">HIGH</span></td>
+          <td>Missing value</td>
+        </tr>
+        <tr>
+          <td class="r">5</td>
+          <td class="f"><code>cpt_code</code></td>
+          <td><span class="sev" style="color:#e0524e">HIGH</span></td>
+          <td>CPT must be 5 digits, e.g. 99213</td>
+        </tr></tbody>
+      </table>
+    </section>
+    <section class="card domain">
+      <div class="dhead">
+        <h2>Communications intelligence <span class="dom">domain=comms</span></h2>
+        <div class="meta">Backing product: <b>CIP</b> &nbsp;·&nbsp; Validates: 9 diagnostic channels, ok/warn/issue severity, 0–100 score</div>
+      </div>
+      <div class="stats">
+        <div class="stat"><div class="num">12</div><div class="lab">rows scanned</div></div>
+        <div class="stat"><div class="num">3</div><div class="lab">issues found</div></div>
+        <div class="stat tally"><span class="pill" style="background:#e0524e22;color:#e0524e;border-color:#e0524e55">3× HIGH</span></div>
+      </div>
+      <table>
+        <thead><tr><th>Row</th><th>Field</th><th>Severity</th><th>Engine finding (verbatim)</th></tr></thead>
+        <tbody>
+        <tr>
+          <td class="r">9</td>
+          <td class="f"><code>url</code></td>
+          <td><span class="sev" style="color:#e0524e">HIGH</span></td>
+          <td>url must start with http:// or https://</td>
+        </tr>
+        <tr>
+          <td class="r">10</td>
+          <td class="f"><code>channel</code></td>
+          <td><span class="sev" style="color:#e0524e">HIGH</span></td>
+          <td>channel must be one of: audit, seo, funnel, email, deliverability, social, browser, inventory, ivr</td>
+        </tr>
+        <tr>
+          <td class="r">11</td>
+          <td class="f"><code>severity</code></td>
+          <td><span class="sev" style="color:#e0524e">HIGH</span></td>
+          <td>finding severity must be ok, warn, or issue</td>
+        </tr></tbody>
+      </table>
+    </section>
+    <section class="card domain">
+      <div class="dhead">
+        <h2>Bookkeeping ledger (SIE/BAS) <span class="dom">domain=accounting</span></h2>
+        <div class="meta">Backing product: <b>PerfectBook (bookie)</b> &nbsp;·&nbsp; Validates: 4-digit BAS accounts, kronor debit/credit, vouchers, VAT</div>
+      </div>
+      <div class="stats">
+        <div class="stat"><div class="num">8</div><div class="lab">rows scanned</div></div>
+        <div class="stat"><div class="num">3</div><div class="lab">issues found</div></div>
+        <div class="stat tally"><span class="pill" style="background:#e0524e22;color:#e0524e;border-color:#e0524e55">3× HIGH</span></div>
+      </div>
+      <table>
+        <thead><tr><th>Row</th><th>Field</th><th>Severity</th><th>Engine finding (verbatim)</th></tr></thead>
+        <tbody>
+        <tr>
+          <td class="r">6</td>
+          <td class="f"><code>voucher_date</code></td>
+          <td><span class="sev" style="color:#e0524e">HIGH</span></td>
+          <td>Missing value</td>
+        </tr>
+        <tr>
+          <td class="r">5</td>
+          <td class="f"><code>account</code></td>
+          <td><span class="sev" style="color:#e0524e">HIGH</span></td>
+          <td>BAS account must be a 4-digit number, e.g. 1930, 3001, 2641</td>
+        </tr>
+        <tr>
+          <td class="r">7</td>
+          <td class="f"><code>amount</code></td>
+          <td><span class="sev" style="color:#e0524e">HIGH</span></td>
+          <td>amount in kronor, up to 2 decimals; positive = debit, negative = credit</td>
+        </tr></tbody>
+      </table>
+    </section>
+    <section class="card domain">
+      <div class="dhead">
+        <h2>Building inspection protocol <span class="dom">domain=inspection</span></h2>
+        <div class="meta">Backing product: <b>besiktning</b> &nbsp;·&nbsp; Validates: under/normalt/over condition scale, AI-confidence, validation gate</div>
+      </div>
+      <div class="stats">
+        <div class="stat"><div class="num">6</div><div class="lab">rows scanned</div></div>
+        <div class="stat"><div class="num">3</div><div class="lab">issues found</div></div>
+        <div class="stat tally"><span class="pill" style="background:#e0524e22;color:#e0524e;border-color:#e0524e55">2× HIGH</span> <span class="pill" style="background:#d9892a22;color:#d9892a;border-color:#d9892a55">1× MEDIUM</span></div>
+      </div>
+      <table>
+        <thead><tr><th>Row</th><th>Field</th><th>Severity</th><th>Engine finding (verbatim)</th></tr></thead>
+        <tbody>
+        <tr>
+          <td class="r">4</td>
+          <td class="f"><code>condition</code></td>
+          <td><span class="sev" style="color:#e0524e">HIGH</span></td>
+          <td>Missing value</td>
+        </tr>
+        <tr>
+          <td class="r">3</td>
+          <td class="f"><code>condition</code></td>
+          <td><span class="sev" style="color:#e0524e">HIGH</span></td>
+          <td>condition (skickbedömning) must be under_normalt, normalt, or over_normalt</td>
+        </tr>
+        <tr>
+          <td class="r">5</td>
+          <td class="f"><code>inspection_date</code></td>
+          <td><span class="sev" style="color:#d9892a">MEDIUM</span></td>
+          <td>inspection_date (besiktningsdag) must be YYYY-MM-DD</td>
+        </tr></tbody>
+      </table>
+    </section>
+</body></html>

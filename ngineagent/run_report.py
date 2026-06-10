@@ -32,15 +32,18 @@ ROOT = Path(__file__).resolve().parents[1]
 RUNS_DIR = ROOT / "runs"
 REPORTS_DIR = ROOT / "reports"
 
-# Brand palette — matches ngineagent/engine/report.py (HeyRoya teal)
-TEAL = "#1dd4b7"
-AMBER = "#f2b36a"
-RED = "#f87171"
-BG = "#0a0f0d"
-SURFACE = "#0f1714"
-INK = "#e8f5f0"
-INK_MUTED = "#7c9a90"
-BORDER = "rgba(29,212,183,0.18)"
+# Brand palette — light theme (matches Engine-Proof-Pack.pdf, AgentOS-report look)
+TEAL = "#0b8c77"          # teal for text, borders, section tags (readable on white)
+ACCENT = "#0fb89c"        # brighter teal for the logo / timeline bars
+AMBER = "#c9781f"
+RED = "#d64541"
+BG = "#ffffff"            # page background
+SURFACE = "#ffffff"       # section card background
+PANEL = "#f6fafa"         # inset panels (sub-cards, metrics, event stream)
+INK = "#16242a"
+INK_MUTED = "#6b7b80"
+BORDER = "#e0e9eb"
+GREEN = "#15936b"         # COMPLETED status
 
 
 def load_run(run_id: str) -> dict:
@@ -80,6 +83,60 @@ def load_run(run_id: str) -> dict:
         "retries": sum(s.get("retries", 0) for s in steps),
         "ok": all(s.get("status") == "OK" for s in steps),
     }
+
+
+def load_bus(bus_path: Path) -> list[dict]:
+    """Load a multi-track BUS log (runtime_loop) and split into per-run groups.
+
+    Recognizes engine.workflow.started/completed (the sequencer's transport events)
+    as well as the engine.run.* aliases, so it reads either source. Raises if empty
+    or if any run lacks a completed step — never renders placeholder numbers.
+    """
+    if not bus_path.exists():
+        raise SystemExit(f"[ERR] bus log not found: {bus_path}\n"
+                         f"      Generate it first: python -m ngineagent.runtime_loop")
+    events = []
+    for line in bus_path.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if line:
+            events.append(json.loads(line))
+    if not events:
+        raise SystemExit(f"[ERR] bus log is empty: {bus_path} — refusing to render.")
+
+    START = {"engine.workflow.started", "engine.run.started"}
+    DONE = {"engine.workflow.completed", "engine.run.completed"}
+    order, by_run = [], {}
+    for e in events:
+        rid = e.get("run_id", "?")
+        if rid not in by_run:
+            by_run[rid] = []
+            order.append(rid)
+        by_run[rid].append(e)
+
+    runs = []
+    for rid in order:
+        evs = by_run[rid]
+        started = next((e for e in evs if e["event"] in START), None)
+        completed = next((e for e in evs if e["event"] in DONE), None)
+        steps = [e for e in evs if e["event"] == "engine.step.completed"]
+        if not started or not completed or not steps:
+            raise SystemExit(f"[ERR] run {rid} in {bus_path.name} is incomplete — refusing to render.")
+        runs.append({
+            "run_id": rid,
+            "workflow": started.get("workflow", "?"),
+            "definition": started.get("def", ""),
+            "started_ts": started["ts"],
+            "trace_id": started.get("trace_id", ""),
+            "session_id": started.get("session_id", ""),
+            "engine_version": started.get("engine_version", ""),
+            "total_ms": completed.get("total_ms", 0),
+            "status_raw": completed.get("status", "COMPLETED"),
+            "events": evs,
+            "steps": steps,
+            "retries": sum(s.get("retries", 0) for s in steps),
+            "ok": completed.get("status", "COMPLETED") == "COMPLETED" and all(s.get("status") == "OK" for s in steps),
+        })
+    return runs
 
 
 def _pct(n, d):
@@ -150,12 +207,13 @@ def render_exec_summary(runs: list[dict]) -> str:
     for r in runs:
         # critical path = linear chain = sum of step durations
         crit = sum(s.get("duration_ms", 0) for s in r["steps"])
-        status_color = TEAL if r["ok"] else RED
+        status_color = GREEN if r["ok"] else RED
+        status_txt = r.get("status_raw", "COMPLETED" if r["ok"] else "FAILED")
         cards += f"""
         <div class="case">
           <div class="case-head">
             <span class="case-name">{esc(r['workflow'])}</span>
-            <span class="badge" style="color:{status_color};border-color:{status_color}">{'COMPLETED' if r['ok'] else 'FAILED'}</span>
+            <span class="badge" style="color:{status_color};border-color:{status_color}">{esc(status_txt)}</span>
           </div>
           <div class="kv"><span>RunId</span><b>{esc(r['run_id'])}</b></div>
           <div class="kv"><span>TraceId</span><b class="mono">{esc((r['trace_id'] or '')[:16])}</b></div>
@@ -265,8 +323,10 @@ def render_event_stream(runs: list[dict]) -> str:
             ev = e["event"]
             ev_color = {
                 "engine.run.started": TEAL, "engine.run.completed": TEAL,
-                "engine.step.started": "#38bdf8", "engine.step.completed": INK_MUTED,
-                "engine.step.retry": AMBER,
+                "engine.workflow.started": TEAL, "engine.workflow.completed": GREEN,
+                "engine.workflow.cancelled": AMBER, "engine.workflow.failed": RED,
+                "engine.step.started": "#2596be", "engine.step.completed": INK_MUTED,
+                "engine.step.retry": AMBER, "engine.step.failed": RED,
             }.get(ev, INK_MUTED)
             detail = e.get("label") or e.get("def") or ""
             extra = []
@@ -323,13 +383,82 @@ def render_perf_metrics(runs: list[dict]) -> str:
     </section>"""
 
 
+def render_architecture(runs: list[dict]) -> str:
+    """§6 — the sequencer / multi-track DAW model, mapped HONESTLY to what runs.
+
+    Active rows = implemented in ngineagent/runtime_loop.py. Planned/scale rows are
+    marked as such — we do not claim Kafka or distributed durability we don't run."""
+    # honest concurrency evidence: did tracks actually overlap on the shared clock?
+    spans = []
+    for r in runs:
+        starts = [e.get("t_ms", 0) for e in r["events"] if e["event"] in
+                  ("engine.workflow.started", "engine.run.started")]
+        ends = [e.get("t_ms", 0) for e in r["events"] if e["event"] in
+                ("engine.workflow.completed", "engine.run.completed")]
+        if starts and ends:
+            spans.append((min(starts), max(ends)))
+    overlapped = any(a[0] < b[1] and b[0] < a[1] for i, a in enumerate(spans) for b in spans[i + 1:])
+    conc_note = (f"Verified concurrent: the {len(runs)} tracks' execution spans overlap on the "
+                 f"shared clock in this run's event log — they were genuinely in flight together, "
+                 f"not run one after another.") if overlapped else (
+                 f"{len(runs)} tracks executed on one RuntimeLoop; spans did not overlap in this short run.")
+
+    cards = [
+        ("Sequencer", "RuntimeLoop", "Central clock, advances every track"),
+        ("Tracks", "WorkflowDefinition + RunId", "One track per workflow, own RunId"),
+        ("Notes", "Step (TOOL / SCRIPT)", "Typed steps with deps, timeout, retry"),
+        ("Playhead", "StepPlanner", "Resolves ready vs blocked steps"),
+        ("Heartbeat", "engine.events.v1 (JSONL bus)", "Every event advances the playhead"),
+        ("Track memory", "per-run ctx + event log", "Replayable, append-only state"),
+    ]
+    card_html = "".join(
+        f'<div class="arch-card"><div class="arch-k">{esc(k)}</div>'
+        f'<div class="arch-v">{esc(v)}</div><div class="arch-d">{esc(d)}</div></div>'
+        for k, v, d in cards)
+
+    controls = [
+        ("Play", "start_workflow(definition)", "Active", GREEN),
+        ("Stop / Cancel", "stop_workflow(run_id)", "Active", GREEN),
+        ("Duplicate", "duplicate_workflow(definition)", "Active", GREEN),
+        ("Multi-track", "play([def, def, ...]) — asyncio", "Active", GREEN),
+        ("Pause / Rewind", "pause / restart workflow", "Planned", AMBER),
+        ("Horizontal scale", "Kafka partitioned by RunId", "Migration path", INK_MUTED),
+    ]
+    ctrl_rows = "".join(
+        f'<tr><td>{esc(c)}</td><td class="mono">{esc(api)}</td>'
+        f'<td class="mono" style="color:{col}">{esc(st)}</td></tr>'
+        for c, api, st, col in controls)
+
+    return f"""
+    <section>
+      <div class="sec-tag">SECTION 6</div>
+      <h2>Architecture — Multi-track Sequencer Model</h2>
+      <p class="arch-lede">The engine runs on a single-node workflow runtime built like a
+      multi-track sequencer: workflows are tracks, steps are notes, events are the clock.
+      The mapping below is to code that ran <b>this report's data</b> — not a diagram of
+      something unbuilt.</p>
+      <div class="arch-grid">{card_html}</div>
+      <table class="arch-table">
+        <thead><tr><th>Transport control</th><th>API</th><th>Status</th></tr></thead>
+        <tbody>{ctrl_rows}</tbody>
+      </table>
+      <div class="arch-foot">
+        <div><b>Concurrency.</b> {esc(conc_note)}</div>
+        <div><b>Honest scope.</b> The event bus is an append-only JSONL log on one node —
+        the correct choice at this volume. Kafka partitioned by RunId is the documented
+        horizontal-scale path, listed above as a migration step, not a current claim.</div>
+      </div>
+    </section>"""
+
+
 def render_report(runs: list[dict]) -> str:
     gen = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     all_ok = all(r["ok"] for r in runs)
     status_pill = f'<span class="pill" style="color:{TEAL}">● All Workflows Completed</span>' if all_ok \
         else f'<span class="pill" style="color:{RED}">● Attention — see step table</span>'
     body = (render_overview() + render_exec_summary(runs) + render_timeline(runs)
-            + render_step_table(runs) + render_event_stream(runs) + render_perf_metrics(runs))
+            + render_step_table(runs) + render_event_stream(runs) + render_perf_metrics(runs)
+            + render_architecture(runs))
     # header trace chips from the first run (the "real distributed system" signal)
     sess = runs[0].get("session_id", "")
     ver = runs[0].get("engine_version", "")
@@ -338,54 +467,63 @@ def render_report(runs: list[dict]) -> str:
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8">
 <title>NgineAgent Run Report</title>
 <style>
-  @page {{ size: A4; margin: 18mm; }}
+  @page {{ size: A4; margin: 16mm; }}
   * {{ box-sizing: border-box; margin: 0; padding: 0; }}
   body {{ font-family: 'JetBrains Mono','SF Mono',Menlo,monospace; background: {BG}; color: {INK}; padding: 40px; line-height: 1.5; }}
-  .header {{ display:flex; align-items:center; gap:16px; border-bottom:2px solid {TEAL}; padding-bottom:18px; margin-bottom:22px; }}
-  .logo {{ width:46px;height:46px;border-radius:10px;background:linear-gradient(135deg,{TEAL},#0f5d3f);flex-shrink:0; }}
-  .h-title {{ font-size:22px;font-weight:800;color:{TEAL};letter-spacing:-0.5px; }}
+  .header {{ display:flex; align-items:center; gap:16px; border-bottom:2px solid {ACCENT}; padding-bottom:18px; margin-bottom:22px; }}
+  .logo {{ width:46px;height:46px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#7fe6d3,{ACCENT} 55%,#0b6f5e);flex-shrink:0;box-shadow:0 2px 8px rgba(15,184,156,.25); }}
+  .h-title {{ font-size:22px;font-weight:800;color:{INK};letter-spacing:-0.5px; }}
   .h-sub {{ font-size:11px;color:{INK_MUTED};margin-top:3px; }}
-  .pill {{ font-size:11px;border:1px solid currentColor;border-radius:999px;padding:3px 12px;margin-right:8px; }}
+  .pill {{ font-size:11px;border:1px solid {BORDER};border-radius:999px;padding:3px 12px;margin-right:8px; }}
   .pills {{ margin: 14px 0 28px; }}
-  section {{ background:{SURFACE};border:1px solid {BORDER};border-radius:12px;padding:24px;margin-bottom:18px; break-inside: avoid; }}
-  .sec-tag {{ display:inline-block;font-size:9px;letter-spacing:2px;color:{TEAL};border:1px solid {TEAL};border-radius:999px;padding:2px 10px;margin-bottom:12px; }}
+  section {{ background:{SURFACE};border:1px solid {BORDER};border-radius:12px;padding:24px;margin-bottom:18px; break-inside: avoid; box-shadow:0 1px 3px rgba(16,40,46,.04); }}
+  .sec-tag {{ display:inline-block;font-size:9px;letter-spacing:2px;color:{TEAL};border:1px solid {ACCENT};border-radius:999px;padding:2px 10px;margin-bottom:12px;background:{PANEL}; }}
   h2 {{ font-size:18px;font-weight:700;margin-bottom:16px;color:{INK}; }}
   .cases {{ display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px; }}
-  .case {{ background:{BG};border:1px solid {BORDER};border-radius:10px;padding:16px; }}
+  .case {{ background:{PANEL};border:1px solid {BORDER};border-radius:10px;padding:16px; }}
   .case-head {{ display:flex;justify-content:space-between;align-items:center;margin-bottom:12px; }}
-  .case-name {{ font-weight:700;font-size:14px; }}
+  .case-name {{ font-weight:700;font-size:14px;color:{INK}; }}
   .badge {{ font-size:9px;border:1px solid;border-radius:999px;padding:2px 10px;font-weight:600; }}
-  .kv {{ display:flex;justify-content:space-between;font-size:11px;padding:4px 0;border-bottom:1px solid rgba(124,154,144,0.12); }}
+  .kv {{ display:flex;justify-content:space-between;font-size:11px;padding:4px 0;border-bottom:1px solid {BORDER}; }}
   .kv span {{ color:{INK_MUTED}; }} .kv b {{ color:{INK};font-weight:600; }}
   .metrics {{ display:grid;grid-template-columns:repeat(5,1fr);gap:10px; }}
   .metrics-4 {{ grid-template-columns:repeat(4,1fr); }}
-  .metric {{ background:{BG};border:1px solid {BORDER};border-radius:8px;padding:14px;text-align:center; }}
+  .metric {{ background:{PANEL};border:1px solid {BORDER};border-radius:8px;padding:14px;text-align:center; }}
   .metric-val {{ font-size:22px;font-weight:800;color:{TEAL}; }}
   .metric-lbl {{ font-size:8px;letter-spacing:1.2px;color:{INK_MUTED};margin-top:5px; }}
   .tl-block {{ margin-bottom:18px; }}
   .tl-title {{ font-size:11px;color:{INK_MUTED};margin-bottom:8px; }}
   .tl-row {{ display:flex;align-items:center;gap:12px;margin-bottom:6px; }}
   .tl-label {{ width:200px;font-size:11px;color:{INK_MUTED};text-align:right;flex-shrink:0; }}
-  .tl-track {{ flex:1;position:relative;height:24px;background:{BG};border-radius:5px;border:1px solid rgba(124,154,144,0.12); }}
+  .tl-track {{ flex:1;position:relative;height:24px;background:{PANEL};border-radius:5px;border:1px solid {BORDER}; }}
   .tl-bar {{ position:absolute;top:3px;height:18px;border-radius:4px;display:flex;align-items:center;padding:0 6px;min-width:34px; }}
-  .tl-bar span {{ font-size:9px;color:#03110d;font-weight:700;white-space:nowrap; }}
+  .tl-bar span {{ font-size:9px;color:#ffffff;font-weight:700;white-space:nowrap; }}
   table {{ width:100%;border-collapse:collapse;font-size:10.5px; }}
-  th {{ text-align:left;color:{TEAL};font-size:9px;letter-spacing:0.5px;text-transform:uppercase;padding:8px 10px;border-bottom:1px solid {BORDER};white-space:nowrap; }}
-  td {{ padding:8px 10px;border-bottom:1px solid rgba(124,154,144,0.1);white-space:nowrap; }}
+  th {{ text-align:left;color:{TEAL};font-size:9px;letter-spacing:0.5px;text-transform:uppercase;padding:8px 10px;border-bottom:2px solid {BORDER};white-space:nowrap; }}
+  td {{ padding:8px 10px;border-bottom:1px solid {BORDER};white-space:nowrap;color:{INK}; }}
   td.label-cell {{ white-space:nowrap;min-width:190px; }}
   .mono {{ font-variant-numeric:tabular-nums; }}
   .ov-grid {{ display:grid;grid-template-columns:1fr 1fr;gap:14px; }}
-  .ov {{ background:{BG};border:1px solid {BORDER};border-radius:10px;padding:14px 16px; }}
+  .ov {{ background:{PANEL};border:1px solid {BORDER};border-radius:10px;padding:14px 16px; }}
   .ov-wide {{ grid-column:1 / -1; }}
   .ov-k {{ font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:{TEAL};margin-bottom:6px; }}
   .ov-v {{ font-size:12px;color:{INK};line-height:1.55; }}
   .topic {{ font-size:10px;color:{INK_MUTED};margin-bottom:12px; }}
-  .stream {{ background:{BG};border:1px solid {BORDER};border-radius:8px;padding:14px;font-size:10px; }}
-  .ev {{ display:flex;gap:10px;padding:3px 0;border-bottom:1px solid rgba(124,154,144,0.07); }}
+  .stream {{ background:{PANEL};border:1px solid {BORDER};border-radius:8px;padding:14px;font-size:10px; }}
+  .ev {{ display:flex;gap:10px;padding:3px 0;border-bottom:1px solid {BORDER}; }}
   .ev-t {{ color:{INK_MUTED};width:78px;flex-shrink:0; }}
-  .ev-run {{ color:{AMBER};width:120px;flex-shrink:0; }}
-  .ev-name {{ width:190px;flex-shrink:0;font-weight:600; }}
+  .ev-run {{ color:{AMBER};width:104px;flex-shrink:0; }}
+  .ev-name {{ width:200px;flex-shrink:0;font-weight:600; }}
   .ev-detail {{ color:{INK_MUTED}; }}
+  .arch-lede {{ font-size:12px;color:{INK};line-height:1.55;margin-bottom:16px;max-width:760px; }}
+  .arch-grid {{ display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px; }}
+  .arch-card {{ background:{PANEL};border:1px solid {BORDER};border-radius:10px;padding:14px 16px; }}
+  .arch-k {{ font-size:13px;font-weight:700;color:{TEAL}; }}
+  .arch-v {{ font-size:11px;color:{INK};margin-top:4px;font-weight:600; }}
+  .arch-d {{ font-size:10px;color:{INK_MUTED};margin-top:3px; }}
+  .arch-table {{ margin-bottom:16px; }}
+  .arch-foot {{ display:grid;grid-template-columns:1fr 1fr;gap:14px;font-size:11px;color:{INK_MUTED};line-height:1.5; }}
+  .arch-foot b {{ color:{INK}; }}
   .footer {{ margin-top:28px;padding-top:14px;border-top:1px solid {BORDER};font-size:9px;color:{INK_MUTED};display:flex;justify-content:space-between; }}
 </style></head><body>
   <div class="header">
@@ -420,32 +558,36 @@ async def _render_pdf(html_path: Path, pdf_path: Path):
 def main():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--run", action="append", default=[], help="Run id (repeatable)")
+    p.add_argument("--bus", help="Multi-track BUS log from runtime_loop (renders all tracks in it)")
     p.add_argument("--all", action="store_true", help="Render every run in runs/")
     p.add_argument("--out", help="Output basename (default: derived from run ids)")
     p.add_argument("--no-pdf", action="store_true", help="HTML only, skip PDF render")
     args = p.parse_args()
 
-    run_ids = list(args.run)
-    if args.all:
-        run_ids = sorted(p.stem for p in RUNS_DIR.glob("*.jsonl"))
-    if not run_ids:
-        raise SystemExit("[ERR] specify --run <id> (repeatable) or --all")
+    if args.bus:
+        runs = load_bus(Path(args.bus))
+        base = args.out or Path(args.bus).stem
+    else:
+        run_ids = list(args.run)
+        if args.all:
+            run_ids = sorted(pp.stem for pp in RUNS_DIR.glob("*.jsonl"))
+        if not run_ids:
+            raise SystemExit("[ERR] specify --bus <log>, --run <id> (repeatable), or --all")
+        runs = [load_run(rid) for rid in run_ids]
+        base = args.out or ("_".join(run_ids) if len(run_ids) <= 2 else f"{run_ids[0]}_plus{len(run_ids)-1}")
 
-    runs = [load_run(rid) for rid in run_ids]
     html = render_report(runs)
-
     REPORTS_DIR.mkdir(parents=True, exist_ok=True)
-    base = args.out or ("_".join(run_ids) if len(run_ids) <= 2 else f"{run_ids[0]}_plus{len(run_ids)-1}")
     html_path = REPORTS_DIR / f"{base}_ENGINE-RUN-REPORT.html"
     html_path.write_text(html, encoding="utf-8")
-    print(f"  ✓ {html_path}")
+    print(f"  [ok] {html_path}")
 
     if not args.no_pdf:
         pdf_path = REPORTS_DIR / f"{base}_ENGINE-RUN-REPORT.pdf"
         try:
             import asyncio
             asyncio.run(_render_pdf(html_path, pdf_path))
-            print(f"  ✓ {pdf_path}")
+            print(f"  [ok] {pdf_path}")
         except Exception as e:
             print(f"  [WARN] PDF render skipped ({type(e).__name__}: {str(e)[:80]}). HTML is ready.")
 

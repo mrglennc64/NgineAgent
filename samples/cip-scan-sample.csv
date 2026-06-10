@@ -1,0 +1,13 @@
+run_id,url,hostname,customer,plan,channel,severity,status,score,label
+CIP-2026-0501,https://acme-demo.com,acme-demo.com,Acme Demonstration Co,Professional,audit,ok,done,92,Comms clarity within target
+CIP-2026-0501,https://acme-demo.com,acme-demo.com,Acme Demonstration Co,Professional,seo,warn,done,74,Thin meta descriptions on 12 pages
+CIP-2026-0501,https://acme-demo.com,acme-demo.com,Acme Demonstration Co,Professional,email,issue,done,41,SPF present but DMARC policy is p=none
+CIP-2026-0501,https://acme-demo.com,acme-demo.com,Acme Demonstration Co,Professional,deliverability,issue,done,38,No DKIM signature on transactional mail
+CIP-2026-0501,https://acme-demo.com,acme-demo.com,Acme Demonstration Co,Professional,funnel,warn,done,68,Contact CTA below the fold on mobile
+CIP-2026-0501,https://acme-demo.com,acme-demo.com,Acme Demonstration Co,Professional,social,ok,done,88,Profiles linked and consistent
+CIP-2026-0501,https://acme-demo.com,acme-demo.com,Acme Demonstration Co,Professional,browser,ok,done,95,Synthetic comms check passed
+CIP-2026-0501,https://acme-demo.com,acme-demo.com,Acme Demonstration Co,Professional,inventory,ok,done,90,All comms surfaces enumerated
+CIP-2026-0501,https://acme-demo.com,acme-demo.com,Acme Demonstration Co,Professional,ivr,warn,done,72,IVR menu depth exceeds 4 levels
+CIP-2026-0502,ftp://bad-url-demo.com,bad-url-demo.com,Beta Demonstration Inc,Standard,seo,warn,done,70,Missing canonical tags
+CIP-2026-0502,https://beta-demo.com,beta-demo.com,Beta Demonstration Inc,Standard,telephony,issue,done,30,Invalid channel test row
+CIP-2026-0503,https://gamma-demo.com,gamma-demo.com,Gamma Demonstration LLC,Starter,email,critical,done,20,Invalid severity test row

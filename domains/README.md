@@ -11,15 +11,15 @@ every domain; `MusicValidator` extends it with royalty-gap + statute logic.
 |---|---|---|---|
 | **music** | ✅ Production | HeyRoya / Kataloghub | Full: schema + rules + MusicValidator (ISRC/ISWC/IPI/splits, royalty-gap, §507(b) statute). |
 | **healthcare** | ✅ Real (this repo) | Denials (RCM) | Schema modeled on the Denials app data shape — CARC/RARC codes, NPI, CPT, ICD-10, modifiers, claim amounts. Structural + format validation. Denial *reasoning/appeal* lives in the Denials app's LLM routes, not the engine. |
+| **comms / CIP** | ✅ Real (this repo) | CIP | Schema modeled on the CIP app's `Run`/`Job`/`Finding`/`Channel` types — 9 diagnostic channels (audit, seo, funnel, email, deliverability, social, browser, inventory, ivr), `ok/warn/issue` severity, 0-100 score. One row = one channel finding. Scan execution + scoring live in the CIP app; the engine validates the finding rows. |
 | **invoice** | ⚠️ Stub | — | Schema only (invoice_number, issue_date, amount, vendor_id + format checks). No domain rules yet. |
 | **base** | ◻️ Fallback | — | Validates only that the file is non-empty. Default catch-all. |
-| **comms / CIP** | ❌ Not built | CIP | No schema, no rules. CIP (Communications Intelligence) is comms data (channels, transcripts, messages) — a different shape from the engine's tabular/metadata model. Needs a data shape defined before a real domain can be built. The `war` repo is *web assessment*, not comms — it does not supply a CIP schema. |
 
 ## Files here
 
-- `healthcare_schema.json` — required fields + regex patterns for denial/claim rows
-- `healthcare_rules.json` — denial-recovery penalties, timely-filing thresholds, CARC category map
-- (`samples/denials-sample.csv` exercises this domain)
+- `healthcare_schema.json` / `healthcare_rules.json` — denial/claim rows (Denials app shape). `samples/denials-sample.csv` exercises it.
+- `comms_schema.json` / `comms_rules.json` — CIP scan-finding rows (CIP app shape). `samples/cip-scan-sample.csv` exercises it.
+- All four JSON files are the source of truth, deployed to the live engine and tracked in the `srv-engine` repo.
 
 ## Deployed to the live engine (engine.usesmpt.com, `/srv/engine`)
 

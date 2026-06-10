@@ -1,0 +1,13 @@
+issue_id,work,field,current_value,suggested,decision,publisher_value,note
+HR-001,Northern Reef,iswc,missing,external lookup match,edit,T-200.003.003-3,
+HR-002,The Queen's Bell,iswc,missing,external lookup match,edit,T-200.004.004-4,
+HR-003,Frozen Time,split_total,90.00%,normalize to 100%,edit,60 / 40,
+HR-004,Iron Country,split_total,110.00%,normalize to 100%,edit,40 / 30 / 30,
+HR-005,Forgotten Days,iswc,missing,external lookup match,edit,T-200.014.014-4,
+HR-006,Winter Rose,writer_ipi,Lars Peterson has no IPI,publisher to provide,edit,00111222333,
+HR-007,North Wind,society,Michael Osberg — missing society,publisher to confirm,edit,STIM,
+HR-008,Berlin Dreams,foreign_writer,Tobias Schmidt (GEMA) — no E/SE/AM declaration,add E declaration,accept,,
+HR-009,Paris in Autumn,foreign_writer,Pierre Lambert (SACEM) — no E/SE/AM declaration,add E declaration,accept,,
+HR-010,Dance of Shadows,role,WR (Anna Holmes),change to CA (CWR-valid),accept,,
+HR-011,Star Road,writer_name,L. Peterson,Lars Peterson (canonical),accept,,
+HR-012,Forgotten Days,writer_ipi,Sophie Berg has no IPI,publisher to provide,edit,00777888999,

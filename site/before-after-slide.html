@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Before / After · Real Engine Output</title>
+<style>
+  :root{
+    --teal:#1dd4b7; --amber:#f2b36a; --red:#f87171;
+    --bg:#0a0f0d; --surface:#0f1714; --ink:#e8f5f0; --muted:#7c9a90;
+    --border:rgba(29,212,183,0.18);
+    --red-bg:rgba(248,113,113,0.08); --red-border:rgba(248,113,113,0.3);
+    --teal-bg:rgba(29,212,183,0.07); --teal-border:rgba(29,212,183,0.35);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:#000}
+  /* 16:9 slide */
+  .slide{
+    width:1280px;height:720px;background:var(--bg);color:var(--ink);
+    font-family:'JetBrains Mono','SF Mono',Menlo,monospace;
+    padding:48px 56px;position:relative;overflow:hidden;
+  }
+  .title{font-size:30px;font-weight:800;letter-spacing:-0.5px;color:var(--ink);}
+  .title .accent{color:var(--teal)}
+  .subtitle{font-size:12px;color:var(--muted);margin-top:6px;letter-spacing:0.5px}
+  .rule{height:2px;background:var(--teal);margin:18px 0 26px;opacity:0.6}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+  .col{border:1px solid var(--border);border-radius:14px;padding:24px;background:var(--surface)}
+  .col.before{border-color:var(--red-border);background:var(--red-bg)}
+  .col.after{border-color:var(--teal-border);background:var(--teal-bg)}
+  .col-tag{font-size:11px;letter-spacing:2.5px;text-transform:uppercase;font-weight:700;margin-bottom:4px}
+  .before .col-tag{color:var(--red)}
+  .after .col-tag{color:var(--teal)}
+  .col-sub{font-size:11px;color:var(--muted);margin-bottom:16px}
+  /* metadata row card */
+  .row{background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:13px 15px;margin-bottom:14px;font-size:11.5px}
+  .row .work{font-size:12px;font-weight:700;margin-bottom:9px;color:var(--ink)}
+  .field{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid rgba(124,154,144,0.10)}
+  .field:last-child{border-bottom:none}
+  .field .k{color:var(--muted)}
+  .field .v{font-variant-numeric:tabular-nums}
+  .v.miss{color:var(--red);font-style:italic}
+  .v.bad{color:var(--amber)}
+  .v.fixed{color:var(--teal);font-weight:600}
+  .findings{list-style:none;font-size:11.5px;margin-top:4px}
+  .findings li{padding:5px 0 5px 20px;position:relative;color:var(--ink);line-height:1.4}
+  .before .findings li::before{content:"\\2715";position:absolute;left:0;color:var(--red);font-weight:700}
+  .after .findings li::before{content:"\\2713";position:absolute;left:0;color:var(--teal);font-weight:700}
+  /* score strip */
+  .score{display:flex;align-items:center;gap:14px;margin-top:16px;padding-top:14px;border-top:1px solid var(--border)}
+  .score .num{font-size:40px;font-weight:800;line-height:1}
+  .before .score .num{color:var(--red)}
+  .after .score .num{color:var(--teal)}
+  .score .meta{font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+  .delta{position:absolute;left:50%;top:355px;transform:translateX(-50%);
+    background:var(--bg);border:1px solid var(--teal-border);border-radius:999px;
+    padding:8px 16px;font-size:13px;font-weight:700;color:var(--teal);z-index:5}
+  .footer{position:absolute;left:56px;right:56px;bottom:26px;display:flex;justify-content:space-between;
+    font-size:10px;color:var(--muted);border-top:1px solid var(--border);padding-top:14px}
+</style>
+</head>
+<body>
+<div class="slide">
+  <div class="title">Before / After · <span class="accent">Real Engine Output</span></div>
+  <div class="subtitle">RUN-CORR-EN · catalog_correction · engine v0.1.0 · derived from live telemetry</div>
+  <div class="rule"></div>
+
+  <div class="cols">
+    <!-- BEFORE -->
+    <div class="col before">
+      <div class="col-tag">Before</div>
+      <div class="col-sub">As received — pre-validation</div>
+      <div class="row">
+        <div class="work">Work: "Forgotten Days"</div>
+        <div class="field"><span class="k">name</span><span class="v">Sophie Berg</span></div>
+        <div class="field"><span class="k">role</span><span class="v">CA</span></div>
+        <div class="field"><span class="k">share_percent</span><span class="v">50</span></div>
+        <div class="field"><span class="k">iswc</span><span class="v miss">— missing —</span></div>
+        <div class="field"><span class="k">ipi</span><span class="v miss">— missing —</span></div>
+        <div class="field"><span class="k">isrc</span><span class="v">US-NRD-26-10014</span></div>
+      </div>
+      <ul class="findings">
+        <li>Missing ISWC — no work identifier</li>
+        <li>Missing writer IPI — payee unresolvable</li>
+        <li>Split totals off 100% elsewhere in catalog</li>
+        <li>Inconsistent identifiers / formatting</li>
+      </ul>
+      <div class="score">
+        <div class="num">53</div>
+        <div class="meta">score_before<br>issues_found = 12</div>
+      </div>
+    </div>
+
+    <!-- AFTER -->
+    <div class="col after">
+      <div class="col-tag">After</div>
+      <div class="col-sub">Post-correction — CWR-aligned</div>
+      <div class="row">
+        <div class="work">Work: "Forgotten Days"</div>
+        <div class="field"><span class="k">name</span><span class="v">Sophie Berg</span></div>
+        <div class="field"><span class="k">role</span><span class="v">CA</span></div>
+        <div class="field"><span class="k">share_percent</span><span class="v">50</span></div>
+        <div class="field"><span class="k">iswc</span><span class="v fixed">T-200.014.014-4</span></div>
+        <div class="field"><span class="k">ipi</span><span class="v fixed">00777888999</span></div>
+        <div class="field"><span class="k">isrc</span><span class="v">US-NRD-26-10014</span></div>
+      </div>
+      <ul class="findings">
+        <li>ISWC resolved &amp; linked</li>
+        <li>Writer IPI resolved — payee routable</li>
+        <li>Split totals normalized to 100%</li>
+        <li>Identifiers &amp; formatting consistent</li>
+      </ul>
+      <div class="score">
+        <div class="num">88</div>
+        <div class="meta">score_after<br>score_delta = +35</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="delta">score_delta = +35</div>
+
+  <div class="footer">
+    <span>Derived from real NgineAgent telemetry. No synthetic examples.</span>
+    <span>engine.events.v1 · RUN-CORR-EN</span>
+  </div>
+</div>
+</body>
+</html>

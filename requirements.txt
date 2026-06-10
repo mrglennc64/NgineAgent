@@ -1,0 +1,4 @@
+# NgineAgent showcase — minimal deps.
+# The engine core (ngineagent/engine/) is pure Python stdlib — no deps needed to RUN it.
+# Playwright is only needed to render the run report to PDF (HTML always works without it).
+playwright==1.48.0

@@ -1,0 +1,91 @@
+{
+  "name": "NgineAgent — CIP Correction Pipeline",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ngine-correct",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "trigger-correct",
+      "name": "Webhook: Correction Request",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.NGINE_ENGINE_URL }}/api/upload/catalog",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [ { "name": "Authorization", "value": "=Bearer {{ $env.NGINE_API_TOKEN }}" } ]
+        },
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [ { "name": "file", "value": "={{ $binary.catalog }}", "parameterType": "formBinaryData" } ]
+        },
+        "options": {}
+      },
+      "id": "post-catalog",
+      "name": "POST catalog (scan)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [520, 300]
+    },
+    {
+      "parameters": { "amount": 3, "unit": "seconds" },
+      "id": "wait-scan",
+      "name": "Wait for Scan",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [800, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.NGINE_ENGINE_URL }}/api/upload/corrections",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [ { "name": "Authorization", "value": "=Bearer {{ $env.NGINE_API_TOKEN }}" } ]
+        },
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            { "name": "catalog", "value": "={{ $binary.catalog }}", "parameterType": "formBinaryData" },
+            { "name": "worksheet", "value": "={{ $binary.worksheet }}", "parameterType": "formBinaryData" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "post-corrections",
+      "name": "POST /api/upload/corrections",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1080, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"run\": $json.correction_job_id, \"score_before\": $json.score_before, \"score_after\": $json.score_after, \"cleaned_csv_url\": $json.cleaned_url, \"after_report_url\": $json.report_url } }}",
+        "options": {}
+      },
+      "id": "respond",
+      "name": "Return Cleaned Result",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1360, 300]
+    }
+  ],
+  "connections": {
+    "Webhook: Correction Request": { "main": [[{ "node": "POST catalog (scan)", "type": "main", "index": 0 }]] },
+    "POST catalog (scan)": { "main": [[{ "node": "Wait for Scan", "type": "main", "index": 0 }]] },
+    "Wait for Scan": { "main": [[{ "node": "POST /api/upload/corrections", "type": "main", "index": 0 }]] },
+    "POST /api/upload/corrections": { "main": [[{ "node": "Return Cleaned Result", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "meta": { "description": "CIP correction pipeline: scan a catalog, apply a publisher-decision worksheet, return cleaned CSV + after-score." }
+}

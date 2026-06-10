@@ -1,0 +1,9 @@
+*.pyc
+__pycache__/
+runs/*.jsonl
+reports/*.html
+reports/*.pdf
+.venv/
+*.egg-info/
+
+reports/*.csv

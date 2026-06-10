@@ -1,0 +1,89 @@
+{
+  "name": "NgineAgent — Metadata Validation",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ngine-validate",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "trigger-validate",
+      "name": "Webhook: Catalog Upload",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.NGINE_ENGINE_URL }}/api/upload/catalog",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $env.NGINE_API_TOKEN }}" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            { "name": "file", "value": "={{ $binary.data }}", "parameterType": "formBinaryData" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "post-catalog",
+      "name": "POST /api/upload/catalog",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [520, 300]
+    },
+    {
+      "parameters": { "amount": 3, "unit": "seconds" },
+      "id": "wait-job",
+      "name": "Wait for Analyze Job",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [800, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.NGINE_ENGINE_URL }}/api/jobs/{{ $json.job_id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $env.NGINE_API_TOKEN }}" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "get-status",
+      "name": "GET job status",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1080, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"run\": $json.job_id, \"score\": $json.score, \"blocking\": $json.blocking, \"resolvable\": $json.resolvable, \"health_report_url\": $json.report_url } }}",
+        "options": {}
+      },
+      "id": "respond",
+      "name": "Return Health Result",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1360, 300]
+    }
+  ],
+  "connections": {
+    "Webhook: Catalog Upload": { "main": [[{ "node": "POST /api/upload/catalog", "type": "main", "index": 0 }]] },
+    "POST /api/upload/catalog": { "main": [[{ "node": "Wait for Analyze Job", "type": "main", "index": 0 }]] },
+    "Wait for Analyze Job": { "main": [[{ "node": "GET job status", "type": "main", "index": 0 }]] },
+    "GET job status": { "main": [[{ "node": "Return Health Result", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "meta": { "description": "Validates a music catalog CSV via the NgineAgent engine and returns the CWR health score + report URL." }
+}

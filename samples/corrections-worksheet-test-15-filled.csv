@@ -1,0 +1,13 @@
+issue_id,work,field,current_value,suggested,decision,publisher_value,note
+HR-001,Skär,iswc,missing,external lookup match,edit,T-200.003.003-3,Confirmed in STIM database
+HR-002,Drottningens Klang,iswc,missing,external lookup match,edit,T-200.004.004-4,Confirmed in STIM database
+HR-003,Frusen Tid,split_total,90.00%,normalize to 100%,edit,60 / 40,Maria 60 / Johan 40
+HR-004,Bergslagen,split_total,110.00%,normalize to 100%,edit,40 / 30 / 30,Karin 40 / Anna 30 / Sofie 30
+HR-005,Glömda Dagar,iswc,missing,external lookup match,edit,T-200.014.014-4,Confirmed in STIM database
+HR-006,Vinterns Ros,writer_ipi,Lars Petersen has no IPI,publisher to provide,edit,00111222333,IPI on file
+HR-007,Nordvinden,society,Mikael Östberg — missing society,publisher to confirm,edit,STIM,Confirmed STIM-affiliated
+HR-008,Berlin Drömmar,foreign_writer,Tobias Schmidt (GEMA) — no E/SE/AM declaration,add E declaration,accept,,
+HR-009,Paris i Höst,foreign_writer,Pierre Lambert (SACEM) — no E/SE/AM declaration,add E declaration,accept,,
+HR-010,Skuggornas Dans,role,WR (Anna Holm),change to CA (CWR-valid),accept,,
+HR-011,Stjärnvägen,writer_name,L. Petersen,Lars Petersen (canonical),accept,,
+HR-012,Glömda Dagar,writer_ipi,Sofie Berg has no IPI,publisher to provide,edit,00777888999,IPI on file

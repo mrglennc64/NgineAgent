@@ -12,36 +12,32 @@
       "name": "Webhook: DIP Intake",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
-      "position": [240, 300]
+      "position": [260, 300]
     },
     {
       "parameters": {
         "method": "POST",
-        "url": "={{ $env.NGINE_ENGINE_URL }}/api/upload/catalog",
+        "url": "={{ $env.NGINE_ENGINE_URL }}/validation/validate",
         "sendHeaders": true,
         "headerParameters": {
-          "parameters": [ { "name": "Authorization", "value": "=Bearer {{ $env.NGINE_API_TOKEN }}" } ]
+          "parameters": [
+            { "name": "Authorization", "value": "=Basic {{ $env.NGINE_BASIC_AUTH }}" }
+          ]
         },
         "sendBody": true,
         "contentType": "multipart-form-data",
         "bodyParameters": {
-          "parameters": [ { "name": "file", "value": "={{ $binary.data }}", "parameterType": "formBinaryData" } ]
+          "parameters": [
+            { "name": "file", "value": "={{ $binary.data }}", "parameterType": "formBinaryData" }
+          ]
         },
         "options": {}
       },
-      "id": "post-catalog",
+      "id": "post-validate",
       "name": "Validate via Engine",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [520, 300]
-    },
-    {
-      "parameters": { "amount": 3, "unit": "seconds" },
-      "id": "wait",
-      "name": "Wait for Scan",
-      "type": "n8n-nodes-base.wait",
-      "typeVersion": 1.1,
-      "position": [800, 300]
+      "position": [560, 300]
     },
     {
       "parameters": {
@@ -62,37 +58,36 @@
       "name": "Score >= 80 ?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [1080, 300]
+      "position": [860, 300]
     },
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={{ { \"route\": \"auto-accept\", \"run\": $json.job_id, \"score\": $json.score, \"message\": \"Catalog is CWR-ready — routed to ingestion.\" } }}",
+        "responseBody": "={{ { \"route\": \"auto-accept\", \"score\": $json.score, \"message\": \"Catalog is CWR-ready — routed to ingestion.\", \"engine\": $json } }}",
         "options": {}
       },
       "id": "route-accept",
       "name": "Route: Auto-Accept",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
-      "position": [1360, 200]
+      "position": [1160, 200]
     },
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={{ { \"route\": \"needs-correction\", \"run\": $json.job_id, \"score\": $json.score, \"blocking\": $json.blocking, \"message\": \"Blocking issues found — routed to correction worksheet.\", \"worksheet_url\": $json.worksheet_url } }}",
+        "responseBody": "={{ { \"route\": \"needs-correction\", \"score\": $json.score, \"message\": \"Blocking issues found — route to correction worksheet.\", \"engine\": $json } }}",
         "options": {}
       },
       "id": "route-correct",
       "name": "Route: Needs Correction",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
-      "position": [1360, 420]
+      "position": [1160, 420]
     }
   ],
   "connections": {
     "Webhook: DIP Intake": { "main": [[{ "node": "Validate via Engine", "type": "main", "index": 0 }]] },
-    "Validate via Engine": { "main": [[{ "node": "Wait for Scan", "type": "main", "index": 0 }]] },
-    "Wait for Scan": { "main": [[{ "node": "Score >= 80 ?", "type": "main", "index": 0 }]] },
+    "Validate via Engine": { "main": [[{ "node": "Score >= 80 ?", "type": "main", "index": 0 }]] },
     "Score >= 80 ?": {
       "main": [
         [{ "node": "Route: Auto-Accept", "type": "main", "index": 0 }],
@@ -101,5 +96,5 @@
     }
   },
   "settings": { "executionOrder": "v1" },
-  "meta": { "description": "DIP intake: validate an incoming catalog, branch on CWR health score (>=80 auto-accept, else route to correction)." }
+  "meta": { "description": "DIP intake: validate incoming catalog via the live engine (POST /validation/validate), branch on CWR health score (>=80 auto-accept, else route to correction)." }
 }

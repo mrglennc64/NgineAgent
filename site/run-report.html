@@ -1,0 +1,297 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<title>NgineAgent Run Report</title>
+<style>
+  @page { size: A4; margin: 18mm; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'JetBrains Mono','SF Mono',Menlo,monospace; background: #0a0f0d; color: #e8f5f0; padding: 40px; line-height: 1.5; }
+  .header { display:flex; align-items:center; gap:16px; border-bottom:2px solid #1dd4b7; padding-bottom:18px; margin-bottom:22px; }
+  .logo { width:46px;height:46px;border-radius:10px;background:linear-gradient(135deg,#1dd4b7,#0f5d3f);flex-shrink:0; }
+  .h-title { font-size:22px;font-weight:800;color:#1dd4b7;letter-spacing:-0.5px; }
+  .h-sub { font-size:11px;color:#7c9a90;margin-top:3px; }
+  .pill { font-size:11px;border:1px solid currentColor;border-radius:999px;padding:3px 12px;margin-right:8px; }
+  .pills { margin: 14px 0 28px; }
+  section { background:#0f1714;border:1px solid rgba(29,212,183,0.18);border-radius:12px;padding:24px;margin-bottom:18px; break-inside: avoid; }
+  .sec-tag { display:inline-block;font-size:9px;letter-spacing:2px;color:#1dd4b7;border:1px solid #1dd4b7;border-radius:999px;padding:2px 10px;margin-bottom:12px; }
+  h2 { font-size:18px;font-weight:700;margin-bottom:16px;color:#e8f5f0; }
+  .cases { display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px; }
+  .case { background:#0a0f0d;border:1px solid rgba(29,212,183,0.18);border-radius:10px;padding:16px; }
+  .case-head { display:flex;justify-content:space-between;align-items:center;margin-bottom:12px; }
+  .case-name { font-weight:700;font-size:14px; }
+  .badge { font-size:9px;border:1px solid;border-radius:999px;padding:2px 10px;font-weight:600; }
+  .kv { display:flex;justify-content:space-between;font-size:11px;padding:4px 0;border-bottom:1px solid rgba(124,154,144,0.12); }
+  .kv span { color:#7c9a90; } .kv b { color:#e8f5f0;font-weight:600; }
+  .metrics { display:grid;grid-template-columns:repeat(5,1fr);gap:10px; }
+  .metrics-4 { grid-template-columns:repeat(4,1fr); }
+  .metric { background:#0a0f0d;border:1px solid rgba(29,212,183,0.18);border-radius:8px;padding:14px;text-align:center; }
+  .metric-val { font-size:22px;font-weight:800;color:#1dd4b7; }
+  .metric-lbl { font-size:8px;letter-spacing:1.2px;color:#7c9a90;margin-top:5px; }
+  .tl-block { margin-bottom:18px; }
+  .tl-title { font-size:11px;color:#7c9a90;margin-bottom:8px; }
+  .tl-row { display:flex;align-items:center;gap:12px;margin-bottom:6px; }
+  .tl-label { width:200px;font-size:11px;color:#7c9a90;text-align:right;flex-shrink:0; }
+  .tl-track { flex:1;position:relative;height:24px;background:#0a0f0d;border-radius:5px;border:1px solid rgba(124,154,144,0.12); }
+  .tl-bar { position:absolute;top:3px;height:18px;border-radius:4px;display:flex;align-items:center;padding:0 6px;min-width:34px; }
+  .tl-bar span { font-size:9px;color:#03110d;font-weight:700;white-space:nowrap; }
+  table { width:100%;border-collapse:collapse;font-size:10.5px; }
+  th { text-align:left;color:#1dd4b7;font-size:9px;letter-spacing:0.5px;text-transform:uppercase;padding:8px 10px;border-bottom:1px solid rgba(29,212,183,0.18); }
+  td { padding:8px 10px;border-bottom:1px solid rgba(124,154,144,0.1); }
+  .mono { font-variant-numeric:tabular-nums; }
+  .topic { font-size:10px;color:#7c9a90;margin-bottom:12px; }
+  .stream { background:#0a0f0d;border:1px solid rgba(29,212,183,0.18);border-radius:8px;padding:14px;font-size:10px; }
+  .ev { display:flex;gap:10px;padding:3px 0;border-bottom:1px solid rgba(124,154,144,0.07); }
+  .ev-t { color:#7c9a90;width:78px;flex-shrink:0; }
+  .ev-run { color:#f2b36a;width:120px;flex-shrink:0; }
+  .ev-name { width:190px;flex-shrink:0;font-weight:600; }
+  .ev-detail { color:#7c9a90; }
+  .footer { margin-top:28px;padding-top:14px;border-top:1px solid rgba(29,212,183,0.18);font-size:9px;color:#7c9a90;display:flex;justify-content:space-between; }
+</style></head><body>
+  <div class="header">
+    <div class="logo"></div>
+    <div>
+      <div class="h-title">NgineAgent · Engine Run Report</div>
+      <div class="h-sub">Metadata Validation &amp; Correction Engine — Execution Telemetry</div>
+    </div>
+  </div>
+  <div class="pills"><span class="pill" style="color:#1dd4b7">● All Workflows Completed</span><span class="pill" style="color:#7c9a90">2026-06-10 12:05 UTC</span><span class="pill" style="color:#7c9a90">Topic: engine.events.v1</span></div>
+  
+    <section>
+      <div class="sec-tag">SECTION 1</div>
+      <h2>Executive Summary</h2>
+      <div class="cases">
+        <div class="case">
+          <div class="case-head">
+            <span class="case-name">metadata_validation</span>
+            <span class="badge" style="color:#1dd4b7;border-color:#1dd4b7">COMPLETED</span>
+          </div>
+          <div class="kv"><span>RunId</span><b>RUN-VAL</b></div>
+          <div class="kv"><span>Definition</span><b>test-15-mixed.csv</b></div>
+          <div class="kv"><span>Steps</span><b>4</b></div>
+          <div class="kv"><span>Total Duration</span><b>2ms</b></div>
+          <div class="kv"><span>Critical Path</span><b>0ms (linear chain)</b></div>
+          <div class="kv"><span>Retries</span><b>0</b></div>
+        </div>
+        <div class="case">
+          <div class="case-head">
+            <span class="case-name">catalog_correction</span>
+            <span class="badge" style="color:#1dd4b7;border-color:#1dd4b7">COMPLETED</span>
+          </div>
+          <div class="kv"><span>RunId</span><b>RUN-CORR</b></div>
+          <div class="kv"><span>Definition</span><b>test-15-mixed.csv</b></div>
+          <div class="kv"><span>Steps</span><b>5</b></div>
+          <div class="kv"><span>Total Duration</span><b>3ms</b></div>
+          <div class="kv"><span>Critical Path</span><b>0ms (linear chain)</b></div>
+          <div class="kv"><span>Retries</span><b>0</b></div>
+        </div></div>
+      <div class="metrics"><div class="metric"><div class="metric-val">2</div><div class="metric-lbl">WORKFLOWS</div></div><div class="metric"><div class="metric-val">9</div><div class="metric-lbl">TOTAL STEPS</div></div><div class="metric"><div class="metric-val">100%</div><div class="metric-lbl">SUCCESS RATE</div></div><div class="metric"><div class="metric-val">0</div><div class="metric-lbl">RETRIES</div></div><div class="metric"><div class="metric-val">3ms</div><div class="metric-lbl">MAX DURATION</div></div></div>
+    </section>
+    <section>
+      <div class="sec-tag">SECTION 2</div>
+      <h2>Workflow Execution Timeline</h2>
+      
+        <div class="tl-block">
+          <div class="tl-title">metadata_validation · RUN-VAL · 2ms total</div>
+          
+            <div class="tl-row">
+              <div class="tl-label">Parse catalog CSV</div>
+              <div class="tl-track">
+                <div class="tl-bar" style="left:50.0%;width:6.0%;background:#38bdf8">
+                  <span>0ms</span>
+                </div>
+              </div>
+            </div>
+            <div class="tl-row">
+              <div class="tl-label">Detect metadata issues</div>
+              <div class="tl-track">
+                <div class="tl-bar" style="left:50.0%;width:6.0%;background:#a78bfa">
+                  <span>0ms</span>
+                </div>
+              </div>
+            </div>
+            <div class="tl-row">
+              <div class="tl-label">Compute CWR health score</div>
+              <div class="tl-track">
+                <div class="tl-bar" style="left:100.0%;width:6.0%;background:#1dd4b7">
+                  <span>0ms</span>
+                </div>
+              </div>
+            </div>
+            <div class="tl-row">
+              <div class="tl-label">Render health report</div>
+              <div class="tl-track">
+                <div class="tl-bar" style="left:100.0%;width:6.0%;background:#f2b36a">
+                  <span>0ms</span>
+                </div>
+              </div>
+            </div>
+        </div>
+        <div class="tl-block">
+          <div class="tl-title">catalog_correction · RUN-CORR · 3ms total</div>
+          
+            <div class="tl-row">
+              <div class="tl-label">Parse catalog + worksheet</div>
+              <div class="tl-track">
+                <div class="tl-bar" style="left:0.0%;width:6.0%;background:#38bdf8">
+                  <span>0ms</span>
+                </div>
+              </div>
+            </div>
+            <div class="tl-row">
+              <div class="tl-label">Detect issues (before)</div>
+              <div class="tl-track">
+                <div class="tl-bar" style="left:0.0%;width:6.0%;background:#a78bfa">
+                  <span>0ms</span>
+                </div>
+              </div>
+            </div>
+            <div class="tl-row">
+              <div class="tl-label">Apply publisher decisions</div>
+              <div class="tl-track">
+                <div class="tl-bar" style="left:50.0%;width:6.0%;background:#1dd4b7">
+                  <span>0ms</span>
+                </div>
+              </div>
+            </div>
+            <div class="tl-row">
+              <div class="tl-label">Detect issues (after)</div>
+              <div class="tl-track">
+                <div class="tl-bar" style="left:100.0%;width:6.0%;background:#f2b36a">
+                  <span>0ms</span>
+                </div>
+              </div>
+            </div>
+            <div class="tl-row">
+              <div class="tl-label">Render after-cleaning report</div>
+              <div class="tl-track">
+                <div class="tl-bar" style="left:100.0%;width:6.0%;background:#f472b6">
+                  <span>0ms</span>
+                </div>
+              </div>
+            </div>
+        </div>
+    </section>
+    <section>
+      <div class="sec-tag">SECTION 3</div>
+      <h2>Step Execution Details</h2>
+      <table>
+        <thead><tr>
+          <th>Workflow</th><th>Step ID</th><th>Type</th><th>Label</th>
+          <th>Duration</th><th>Timeout</th><th>Retries</th><th>Status</th><th>Start</th>
+        </tr></thead>
+        <tbody>
+            <tr>
+              <td>metadata_validation</td>
+              <td class="mono">step_1</td>
+              <td>parse</td>
+              <td>Parse catalog CSV</td>
+              <td class="mono">0ms</td>
+              <td class="mono">2000ms</td>
+              <td class="mono">0</td>
+              <td class="mono" style="color:#1dd4b7">OK</td>
+              <td class="mono">T+00001ms</td>
+            </tr>
+            <tr>
+              <td>metadata_validation</td>
+              <td class="mono">step_2</td>
+              <td>detect</td>
+              <td>Detect metadata issues</td>
+              <td class="mono">0ms</td>
+              <td class="mono">2000ms</td>
+              <td class="mono">0</td>
+              <td class="mono" style="color:#1dd4b7">OK</td>
+              <td class="mono">T+00001ms</td>
+            </tr>
+            <tr>
+              <td>metadata_validation</td>
+              <td class="mono">step_3</td>
+              <td>score</td>
+              <td>Compute CWR health score</td>
+              <td class="mono">0ms</td>
+              <td class="mono">1000ms</td>
+              <td class="mono">0</td>
+              <td class="mono" style="color:#1dd4b7">OK</td>
+              <td class="mono">T+00002ms</td>
+            </tr>
+            <tr>
+              <td>metadata_validation</td>
+              <td class="mono">step_4</td>
+              <td>render</td>
+              <td>Render health report</td>
+              <td class="mono">0ms</td>
+              <td class="mono">1500ms</td>
+              <td class="mono">0</td>
+              <td class="mono" style="color:#1dd4b7">OK</td>
+              <td class="mono">T+00002ms</td>
+            </tr>
+            <tr>
+              <td>catalog_correction</td>
+              <td class="mono">step_1</td>
+              <td>parse</td>
+              <td>Parse catalog + worksheet</td>
+              <td class="mono">0ms</td>
+              <td class="mono">2000ms</td>
+              <td class="mono">0</td>
+              <td class="mono" style="color:#1dd4b7">OK</td>
+              <td class="mono">T+00000ms</td>
+            </tr>
+            <tr>
+              <td>catalog_correction</td>
+              <td class="mono">step_2</td>
+              <td>detect</td>
+              <td>Detect issues (before)</td>
+              <td class="mono">0ms</td>
+              <td class="mono">2000ms</td>
+              <td class="mono">0</td>
+              <td class="mono" style="color:#1dd4b7">OK</td>
+              <td class="mono">T+00000ms</td>
+            </tr>
+            <tr>
+              <td>catalog_correction</td>
+              <td class="mono">step_3</td>
+              <td>apply</td>
+              <td>Apply publisher decisions</td>
+              <td class="mono">0ms</td>
+              <td class="mono">2500ms</td>
+              <td class="mono">0</td>
+              <td class="mono" style="color:#1dd4b7">OK</td>
+              <td class="mono">T+00001ms</td>
+            </tr>
+            <tr>
+              <td>catalog_correction</td>
+              <td class="mono">step_4</td>
+              <td>detect</td>
+              <td>Detect issues (after)</td>
+              <td class="mono">0ms</td>
+              <td class="mono">2000ms</td>
+              <td class="mono">0</td>
+              <td class="mono" style="color:#1dd4b7">OK</td>
+              <td class="mono">T+00002ms</td>
+            </tr>
+            <tr>
+              <td>catalog_correction</td>
+              <td class="mono">step_5</td>
+              <td>render</td>
+              <td>Render after-cleaning report</td>
+              <td class="mono">0ms</td>
+              <td class="mono">1500ms</td>
+              <td class="mono">0</td>
+              <td class="mono" style="color:#1dd4b7">OK</td>
+              <td class="mono">T+00002ms</td>
+            </tr></tbody>
+      </table>
+    </section>
+    <section>
+      <div class="sec-tag">SECTION 4</div>
+      <h2>Event Stream</h2>
+      <div class="topic">Topic: engine.events.v1 · 22 events · partitioned by RunId</div>
+      <div class="stream"><div class="ev"><span class="ev-t">T+00001ms</span><span class="ev-run">[RUN-VAL]</span><span class="ev-name" style="color:#1dd4b7">engine.run.started</span><span class="ev-detail">test-15-mixed.csv</span></div><div class="ev"><span class="ev-t">T+00001ms</span><span class="ev-run">[RUN-VAL]</span><span class="ev-name" style="color:#38bdf8">engine.step.started</span><span class="ev-detail">Parse catalog CSV</span></div><div class="ev"><span class="ev-t">T+00001ms</span><span class="ev-run">[RUN-VAL]</span><span class="ev-name" style="color:#7c9a90">engine.step.completed</span><span class="ev-detail">Parse catalog CSV  status=OK</span></div><div class="ev"><span class="ev-t">T+00001ms</span><span class="ev-run">[RUN-VAL]</span><span class="ev-name" style="color:#38bdf8">engine.step.started</span><span class="ev-detail">Detect metadata issues</span></div><div class="ev"><span class="ev-t">T+00002ms</span><span class="ev-run">[RUN-VAL]</span><span class="ev-name" style="color:#7c9a90">engine.step.completed</span><span class="ev-detail">Detect metadata issues  issues_found=12 status=OK</span></div><div class="ev"><span class="ev-t">T+00002ms</span><span class="ev-run">[RUN-VAL]</span><span class="ev-name" style="color:#38bdf8">engine.step.started</span><span class="ev-detail">Compute CWR health score</span></div><div class="ev"><span class="ev-t">T+00002ms</span><span class="ev-run">[RUN-VAL]</span><span class="ev-name" style="color:#7c9a90">engine.step.completed</span><span class="ev-detail">Compute CWR health score  score=53 status=OK</span></div><div class="ev"><span class="ev-t">T+00002ms</span><span class="ev-run">[RUN-VAL]</span><span class="ev-name" style="color:#38bdf8">engine.step.started</span><span class="ev-detail">Render health report</span></div><div class="ev"><span class="ev-t">T+00002ms</span><span class="ev-run">[RUN-VAL]</span><span class="ev-name" style="color:#7c9a90">engine.step.completed</span><span class="ev-detail">Render health report  status=OK</span></div><div class="ev"><span class="ev-t">T+00002ms</span><span class="ev-run">[RUN-VAL]</span><span class="ev-name" style="color:#1dd4b7">engine.run.completed</span><span class="ev-detail">  status=OK total_ms=2</span></div><div class="ev"><span class="ev-t">T+00000ms</span><span class="ev-run">[RUN-CORR]</span><span class="ev-name" style="color:#1dd4b7">engine.run.started</span><span class="ev-detail">test-15-mixed.csv</span></div><div class="ev"><span class="ev-t">T+00000ms</span><span class="ev-run">[RUN-CORR]</span><span class="ev-name" style="color:#38bdf8">engine.step.started</span><span class="ev-detail">Parse catalog + worksheet</span></div><div class="ev"><span class="ev-t">T+00000ms</span><span class="ev-run">[RUN-CORR]</span><span class="ev-name" style="color:#7c9a90">engine.step.completed</span><span class="ev-detail">Parse catalog + worksheet  status=OK</span></div><div class="ev"><span class="ev-t">T+00000ms</span><span class="ev-run">[RUN-CORR]</span><span class="ev-name" style="color:#38bdf8">engine.step.started</span><span class="ev-detail">Detect issues (before)</span></div><div class="ev"><span class="ev-t">T+00001ms</span><span class="ev-run">[RUN-CORR]</span><span class="ev-name" style="color:#7c9a90">engine.step.completed</span><span class="ev-detail">Detect issues (before)  issues_found=12 score_before=53 status=OK</span></div><div class="ev"><span class="ev-t">T+00001ms</span><span class="ev-run">[RUN-CORR]</span><span class="ev-name" style="color:#38bdf8">engine.step.started</span><span class="ev-detail">Apply publisher decisions</span></div><div class="ev"><span class="ev-t">T+00002ms</span><span class="ev-run">[RUN-CORR]</span><span class="ev-name" style="color:#7c9a90">engine.step.completed</span><span class="ev-detail">Apply publisher decisions  accept=4 edit=8 reject=0 decisions=12 status=OK</span></div><div class="ev"><span class="ev-t">T+00002ms</span><span class="ev-run">[RUN-CORR]</span><span class="ev-name" style="color:#38bdf8">engine.step.started</span><span class="ev-detail">Detect issues (after)</span></div><div class="ev"><span class="ev-t">T+00002ms</span><span class="ev-run">[RUN-CORR]</span><span class="ev-name" style="color:#7c9a90">engine.step.completed</span><span class="ev-detail">Detect issues (after)  score_after=88 score_delta=35 status=OK</span></div><div class="ev"><span class="ev-t">T+00002ms</span><span class="ev-run">[RUN-CORR]</span><span class="ev-name" style="color:#38bdf8">engine.step.started</span><span class="ev-detail">Render after-cleaning report</span></div><div class="ev"><span class="ev-t">T+00003ms</span><span class="ev-run">[RUN-CORR]</span><span class="ev-name" style="color:#7c9a90">engine.step.completed</span><span class="ev-detail">Render after-cleaning report  status=OK</span></div><div class="ev"><span class="ev-t">T+00003ms</span><span class="ev-run">[RUN-CORR]</span><span class="ev-name" style="color:#1dd4b7">engine.run.completed</span><span class="ev-detail">  status=OK total_ms=3</span></div></div>
+    </section>
+    <section>
+      <div class="sec-tag">SECTION 5</div>
+      <h2>Performance Metrics</h2>
+      <div class="metrics metrics-4"><div class="metric"><div class="metric-val">4,400</div><div class="metric-lbl">EVENTS / SEC</div></div><div class="metric"><div class="metric-val">9</div><div class="metric-lbl">STEPS EXECUTED</div></div><div class="metric"><div class="metric-val">0.0%</div><div class="metric-lbl">RETRY RATE</div></div><div class="metric"><div class="metric-val">100%</div><div class="metric-lbl">SUCCESS RATE</div></div><div class="metric"><div class="metric-val">0ms</div><div class="metric-lbl">MEAN STEP DURATION</div></div><div class="metric"><div class="metric-val">0ms</div><div class="metric-lbl">P99 STEP DURATION</div></div><div class="metric"><div class="metric-val">5ms</div><div class="metric-lbl">TOTAL RUNTIME</div></div><div class="metric"><div class="metric-val">0ms</div><div class="metric-lbl">CRITICAL PATH (MAX)</div></div></div>
+    </section>
+  <div class="footer">
+    <span>NgineAgent · telemetry derived from real engine runs · no synthetic metrics</span>
+    <span>Generated 2026-06-10 12:05 UTC</span>
+  </div>
+</body></html>

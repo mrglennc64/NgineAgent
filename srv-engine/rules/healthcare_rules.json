@@ -1,0 +1,27 @@
+{
+  "domain": "healthcare",
+  "description": "Healthcare/denials domain rules — denial-recovery weighting + timely-filing thresholds. Modeled on the Denials RCM app; consumed alongside healthcare_schema.json.",
+  "penalties": {
+    "missing_denial_code": 35,
+    "missing_npi": 25,
+    "missing_cpt": 20,
+    "missing_icd10": 10,
+    "zero_paid_on_denial": 15
+  },
+  "thresholds": {
+    "clean_claim_score": 90,
+    "at_risk_score": 70
+  },
+  "timely_filing": {
+    "urgent_days": 90,
+    "warning_days": 180,
+    "note": "Most US payers enforce 90-365 day timely-filing windows; flag claims approaching the limit."
+  },
+  "denial_categories": {
+    "CO": "Contractual Obligation (provider write-off risk)",
+    "PR": "Patient Responsibility",
+    "OA": "Other Adjustment",
+    "PI": "Payer Initiated reduction",
+    "CR": "Correction/Reversal"
+  }
+}

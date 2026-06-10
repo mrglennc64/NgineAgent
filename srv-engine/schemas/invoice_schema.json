@@ -1,0 +1,35 @@
+{
+  "domain": "invoice",
+  "description": "Invoice / line-item row. Stub schema — extend per accounting system.",
+  "required": ["invoice_number", "issue_date", "amount", "vendor_id"],
+  "fields": {
+    "invoice_number": {
+      "severity": "HIGH"
+    },
+    "issue_date": {
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+      "severity": "HIGH",
+      "pattern_message": "issue_date must be YYYY-MM-DD"
+    },
+    "due_date": {
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+      "severity": "MEDIUM",
+      "pattern_message": "due_date must be YYYY-MM-DD"
+    },
+    "amount": {
+      "pattern": "^-?\\d+(\\.\\d{1,2})?$",
+      "severity": "HIGH",
+      "pattern_message": "amount must be numeric with up to 2 decimal places"
+    },
+    "currency": {
+      "pattern": "^[A-Z]{3}$",
+      "severity": "MEDIUM",
+      "pattern_message": "currency must be 3-letter ISO 4217 code (e.g. USD, EUR)"
+    },
+    "vat_number": {
+      "severity": "LOW"
+    }
+  },
+  "identifiers": ["invoice_number", "vendor_id"],
+  "revenue_critical_fields": ["amount", "currency", "due_date"]
+}

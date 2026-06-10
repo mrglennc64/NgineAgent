@@ -1,0 +1,27 @@
+{
+  "domain": "music",
+  "description": "Music-domain validation rules used by MusicValidator alongside the schema.",
+  "penalties": {
+    "missing_iswc": 35,
+    "missing_ipi_and_isni": 20,
+    "missing_ipi_only": 10,
+    "no_release_history": 15,
+    "short_recording": 5
+  },
+  "thresholds": {
+    "min_duration_seconds": 120,
+    "secure_score": 90,
+    "at_risk_score": 70
+  },
+  "revenue_weights": {
+    "streaming": 0.4,
+    "mechanical": 0.3,
+    "performance": 0.2,
+    "sync": 0.1
+  },
+  "statute_of_limitations": {
+    "urgent_years": 3.0,
+    "warning_years": 2.5,
+    "law_citation": "17 U.S.C. § 507(b)"
+  }
+}

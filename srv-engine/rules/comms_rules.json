@@ -1,0 +1,35 @@
+{
+  "domain": "comms",
+  "description": "CIP comms-intelligence domain rules — channel weighting + finding-severity penalties. Modeled on the CIP app's 9-channel scan model; consumed alongside comms_schema.json.",
+  "penalties": {
+    "issue": 25,
+    "warn": 10,
+    "ok": 0
+  },
+  "thresholds": {
+    "healthy_score": 90,
+    "at_risk_score": 70
+  },
+  "channel_weights": {
+    "audit": 0.18,
+    "deliverability": 0.16,
+    "email": 0.14,
+    "seo": 0.12,
+    "funnel": 0.12,
+    "browser": 0.10,
+    "ivr": 0.08,
+    "social": 0.06,
+    "inventory": 0.04
+  },
+  "channel_labels": {
+    "audit": "Comms Clarity",
+    "seo": "Buyer Discoverability",
+    "funnel": "Conversion Path",
+    "email": "Email Touchpoints",
+    "deliverability": "Comms Surface Security",
+    "social": "Social Presence",
+    "browser": "Synthetic Comms Check",
+    "inventory": "Comms Surfaces Inventory",
+    "ivr": "IVR Audit"
+  }
+}

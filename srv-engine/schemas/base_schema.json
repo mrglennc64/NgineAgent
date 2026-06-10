@@ -1,0 +1,6 @@
+{
+  "domain": "base",
+  "description": "Default fallback schema. Validates only that the file is non-empty.",
+  "required": [],
+  "fields": {}
+}

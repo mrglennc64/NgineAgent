@@ -1,0 +1,24 @@
+{
+  "domain": "inspection",
+  "description": "Building-inspection domain rules — condition weighting + AI-finding validation gates. Modeled on the besiktning app (besiktningsprotokoll). Consumed alongside inspection_schema.json.",
+  "penalties": {
+    "missing_condition": 30,
+    "unvalidated_ai_finding": 15,
+    "low_confidence_unvalidated": 25,
+    "no_photo_on_issue": 10
+  },
+  "thresholds": {
+    "protocol_complete_score": 90,
+    "needs_review_score": 70,
+    "min_ai_confidence_auto_accept": 0.85
+  },
+  "condition_scale": {
+    "under_normalt": "Below normal — flag for remediation",
+    "normalt": "Normal for age/type",
+    "over_normalt": "Above normal"
+  },
+  "review_gate": {
+    "rule": "AI-matched findings below min_ai_confidence_auto_accept must have validated_by_user = true before the protocol is finalized.",
+    "note": "Enforced in the besiktning app workflow; engine flags rows that violate it."
+  }
+}

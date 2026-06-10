@@ -1,0 +1,55 @@
+{
+  "domain": "comms",
+  "description": "CIP (Communications Intelligence Platform) scan-finding row — modeled on the CIP app's Run/Job/Finding/Channel types. One row = one channel finding from a comms-surface scan (web, email, social, IVR). Structural + format validation; scan execution + scoring live in the CIP application layer.",
+  "required": [
+    "run_id",
+    "url",
+    "channel",
+    "severity",
+    "label"
+  ],
+  "fields": {
+    "run_id": {
+      "severity": "HIGH"
+    },
+    "url": {
+      "pattern": "^https?://[^\\s]+$",
+      "severity": "HIGH",
+      "pattern_message": "url must start with http:// or https://"
+    },
+    "hostname": {
+      "severity": "LOW"
+    },
+    "customer": {
+      "severity": "LOW"
+    },
+    "plan": {
+      "pattern": "^(Starter|Standard|Professional)$",
+      "severity": "LOW",
+      "pattern_message": "plan must be Starter, Standard, or Professional"
+    },
+    "channel": {
+      "pattern": "^(audit|seo|funnel|email|deliverability|social|browser|inventory|ivr)$",
+      "severity": "HIGH",
+      "pattern_message": "channel must be one of: audit, seo, funnel, email, deliverability, social, browser, inventory, ivr"
+    },
+    "severity": {
+      "pattern": "^(ok|warn|issue)$",
+      "severity": "HIGH",
+      "pattern_message": "finding severity must be ok, warn, or issue"
+    },
+    "status": {
+      "pattern": "^(pending|running|done|failed)$",
+      "severity": "LOW",
+      "pattern_message": "job status must be pending, running, done, or failed"
+    },
+    "score": {
+      "pattern": "^(100|[1-9]?[0-9])$",
+      "severity": "MEDIUM",
+      "pattern_message": "score must be an integer 0-100"
+    },
+    "label": {
+      "severity": "MEDIUM"
+    }
+  }
+}

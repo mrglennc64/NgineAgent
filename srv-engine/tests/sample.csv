@@ -1,0 +1,6 @@
+title,artist,isrc,iswc,ipi,isni,release_date,duration_seconds
+Hello,Adele,USRC12345678,T-123.456.789-0,123456789,,2015-10-23,295
+Drake Track,Drake,USRC99999999,,,,,210
+,Missing Title,USRC11111111,T-999.999.999-9,111111111,1234567890123456,2020-01-15,180
+Bad Format,SomeoneElse,not-an-isrc,,,,2022-05-10,120
+Old Track,Vintage,USRC22222222,T-111.222.333-4,222222222,,2018-01-01,200

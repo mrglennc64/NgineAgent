@@ -1,0 +1,50 @@
+{
+  "domain": "accounting",
+  "description": "Swedish double-entry bookkeeping ledger line — modeled on the PerfectBook (bookie) app's SIE/BAS data shape. One row = one transaction line on a voucher (verifikation). Amounts in kronor, positive = debit, negative = credit (SIE convention). Hash-chain immutability + report generation live in the PerfectBook app; the engine validates the ledger rows.",
+  "required": [
+    "account",
+    "amount",
+    "voucher_series",
+    "voucher_date"
+  ],
+  "fields": {
+    "account": {
+      "pattern": "^\\d{4}$",
+      "severity": "HIGH",
+      "pattern_message": "BAS account must be a 4-digit number, e.g. 1930, 3001, 2641"
+    },
+    "amount": {
+      "pattern": "^-?\\d+(\\.\\d{1,2})?$",
+      "severity": "HIGH",
+      "pattern_message": "amount in kronor, up to 2 decimals; positive = debit, negative = credit"
+    },
+    "voucher_series": {
+      "pattern": "^[A-Z]{1,3}$",
+      "severity": "MEDIUM",
+      "pattern_message": "voucher series is 1-3 uppercase letters, e.g. A, V, INV"
+    },
+    "voucher_number": {
+      "pattern": "^\\d+$",
+      "severity": "LOW",
+      "pattern_message": "voucher number must be a positive integer"
+    },
+    "voucher_date": {
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+      "severity": "HIGH",
+      "pattern_message": "voucher_date must be YYYY-MM-DD"
+    },
+    "description": {
+      "severity": "LOW"
+    },
+    "vat_code": {
+      "pattern": "^(SE25|SE12|SE06|RC|EU|EXPORT|NONE)$",
+      "severity": "LOW",
+      "pattern_message": "vat_code: SE25, SE12, SE06, RC, EU, EXPORT, or NONE"
+    },
+    "sru": {
+      "pattern": "^\\d{4,5}$",
+      "severity": "LOW",
+      "pattern_message": "SRU code is 4-5 digits"
+    }
+  }
+}

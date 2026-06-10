@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Engine Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  :root {
+    --bg: #f4f9f9;
+    --card: #ffffff;
+    --border: #e0e9eb;
+    --accent: #16242a;
+    --muted: #6b7b80;
+    --green: #15936b;
+    --yellow: #c9781f;
+    --red: #d64541;
+    --blue: #0b8c77;
+    --teal: #0fb89c;
+    --font: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--accent);
+    font-family: var(--font);
+    padding: 20px;
+    min-height: 100vh;
+  }
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  header h1 { font-size: 20px; font-weight: 600; }
+  header .meta { font-size: 12px; color: var(--muted); }
+  .layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  @media (max-width: 1000px) { .layout { grid-template-columns: 1fr; } }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 1px 3px rgba(16,40,46,.04);
+  }
+  .card h2 {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .stat-value { font-size: 22px; font-weight: 500; line-height: 1.2; }
+  .stat-label { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 999px; margin-right: 6px; vertical-align: middle; }
+  .dot.ok { background: var(--green); }
+  .dot.bad { background: var(--red); }
+  .dot.warn { background: var(--yellow); }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th { text-align: left; color: var(--muted); font-weight: 500; padding: 6px 4px; border-bottom: 1px solid var(--border); }
+  td { padding: 6px 4px; border-bottom: 1px solid var(--border); font-family: var(--mono); }
+  td.value, th.value { text-align: right; }
+  tr:last-child td { border-bottom: none; }
+  .empty { color: var(--muted); font-style: italic; text-align: center; padding: 12px 0; }
+  .badge {
+    display: inline-block;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-family: var(--mono);
+  }
+  .badge.ok { background: rgba(21, 147, 107, 0.12); color: var(--green); }
+  .badge.bad { background: rgba(214, 69, 65, 0.12); color: var(--red); }
+  .badge.warn { background: rgba(201, 120, 31, 0.12); color: var(--yellow); }
+  .badge.info { background: rgba(11, 140, 119, 0.12); color: var(--blue); }
+  .btn {
+    font-size: 12px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: #ffffff;
+    color: var(--accent);
+    cursor: pointer;
+    font-family: var(--font);
+  }
+  .btn:hover { background: #eef5f4; }
+  .btn.primary { background: var(--blue); border-color: var(--blue); color: white; }
+  .btn.primary:hover { background: #0b6f5e; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .form-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; flex-wrap: wrap; }
+  .form-row label { font-size: 12px; color: var(--muted); min-width: 60px; }
+  input[type="file"], select, input[type="text"] {
+    background: #ffffff;
+    border: 1px solid var(--border);
+    color: var(--accent);
+    padding: 6px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-family: var(--font);
+  }
+  select { min-width: 120px; }
+  .tabs { display: flex; gap: 4px; margin-bottom: 12px; }
+  .tab {
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    color: var(--muted);
+    background: transparent;
+    border: 1px solid transparent;
+  }
+  .tab.active { background: #eef5f4; color: var(--accent); border-color: var(--border); }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+  pre.output {
+    background: #f6fafa;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px;
+    font-family: var(--mono);
+    font-size: 11px;
+    max-height: 320px;
+    overflow: auto;
+    color: var(--accent);
+    white-space: pre-wrap;
+    word-break: break-word;
+    margin-top: 8px;
+  }
+  .severity-HIGH { color: var(--red); }
+  .severity-MEDIUM { color: var(--yellow); }
+  .severity-LOW { color: var(--muted); }
+  .severity-INFO { color: var(--blue); }
+  .endpoint-cell { color: var(--blue); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1 style="display:flex;align-items:center;gap:10px">
+    <span style="width:26px;height:26px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#7fe6d3,var(--teal) 55%,#0b6f5e);box-shadow:0 2px 6px rgba(15,184,156,.3)"></span>
+    Engine Dashboard
+  </h1>
+  <div class="meta">
+    <span id="auto-refresh-status">auto-refresh: on (5s)</span>
+    &nbsp;·&nbsp;
+    <a href="/docs" target="_blank" style="color:var(--blue);text-decoration:none">/docs</a>
+    &nbsp;·&nbsp;
+    <a href="/health" target="_blank" style="color:var(--blue);text-decoration:none">/health</a>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- ───────── LEFT COLUMN ───────── -->
+  <div>
+
+    <div class="card">
+      <h2>Engine Status <button class="btn" id="btn-refresh">Refresh</button></h2>
+      <div class="grid-4">
+        <div><div class="stat-value" id="health"><span class="dot warn"></span>–</div><div class="stat-label">Health</div></div>
+        <div><div class="stat-value" id="uptime">–</div><div class="stat-label">Uptime</div></div>
+        <div><div class="stat-value" id="total-requests">–</div><div class="stat-label">Total Requests</div></div>
+        <div><div class="stat-value" id="last-request">–</div><div class="stat-label">Last Request</div></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <h2>Performance (avg ms per endpoint)</h2>
+      <table>
+        <thead><tr><th>Endpoint</th><th class="value">Avg ms</th></tr></thead>
+        <tbody id="perf-table"><tr><td colspan="2" class="empty">No requests yet.</td></tr></tbody>
+      </table>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <h2>Domain Usage</h2>
+      <table>
+        <thead><tr><th>Domain</th><th class="value">Requests</th></tr></thead>
+        <tbody id="domain-table"><tr><td colspan="2" class="empty">No requests yet.</td></tr></tbody>
+      </table>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <h2>Errors</h2>
+      <table>
+        <thead><tr><th>Time</th><th>Endpoint</th><th>Error</th></tr></thead>
+        <tbody id="errors-table"><tr><td colspan="3" class="empty">No errors.</td></tr></tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <!-- ───────── RIGHT COLUMN ───────── -->
+  <div>
+
+    <div class="card">
+      <h2>Try It</h2>
+      <div class="tabs">
+        <div class="tab active" data-tab="validate">Validate</div>
+        <div class="tab" data-tab="worksheet">Worksheet</div>
+        <div class="tab" data-tab="correct">Correct</div>
+        <div class="tab" data-tab="export">Export</div>
+      </div>
+
+      <div class="tab-panel active" id="panel-validate">
+        <div class="form-row">
+          <label>File</label>
+          <input type="file" id="v-file" accept=".csv,.xlsx,.xls">
+        </div>
+        <div class="form-row">
+          <label>Domain</label>
+          <select id="v-domain">
+            <option value="music" selected>music</option>
+            <option value="healthcare">healthcare</option>
+            <option value="comms">comms</option>
+            <option value="accounting">accounting</option>
+            <option value="inspection">inspection</option>
+            <option value="invoice">invoice</option>
+            <option value="base">base</option>
+          </select>
+          <button class="btn primary" id="btn-validate">Run /validation/validate</button>
+        </div>
+        <pre class="output" id="out-validate">No run yet.</pre>
+      </div>
+
+      <div class="tab-panel" id="panel-worksheet">
+        <div class="form-row">
+          <label>File</label>
+          <input type="file" id="w-file" accept=".csv,.xlsx,.xls">
+        </div>
+        <div class="form-row">
+          <label>Domain</label>
+          <select id="w-domain">
+            <option value="music" selected>music</option>
+            <option value="healthcare">healthcare</option>
+            <option value="comms">comms</option>
+            <option value="accounting">accounting</option>
+            <option value="inspection">inspection</option>
+            <option value="invoice">invoice</option>
+            <option value="base">base</option>
+          </select>
+          <button class="btn primary" id="btn-worksheet">Run /validation/worksheet</button>
+          <button class="btn" id="btn-dl-worksheet" disabled>Download worksheet.csv</button>
+        </div>
+        <pre class="output" id="out-worksheet">No run yet.</pre>
+      </div>
+
+      <div class="tab-panel" id="panel-correct">
+        <div class="form-row">
+          <label>Original</label>
+          <input type="file" id="c-orig" accept=".csv,.xlsx,.xls">
+        </div>
+        <div class="form-row">
+          <label>Worksheet</label>
+          <input type="file" id="c-ws" accept=".csv,.xlsx,.xls">
+        </div>
+        <div class="form-row">
+          <label>Domain</label>
+          <select id="c-domain">
+            <option value="music" selected>music</option>
+            <option value="healthcare">healthcare</option>
+            <option value="comms">comms</option>
+            <option value="accounting">accounting</option>
+            <option value="inspection">inspection</option>
+            <option value="invoice">invoice</option>
+            <option value="base">base</option>
+          </select>
+          <button class="btn primary" id="btn-correct">Run /correction/apply</button>
+        </div>
+        <pre class="output" id="out-correct">No run yet.</pre>
+      </div>
+
+      <div class="tab-panel" id="panel-export">
+        <div class="form-row">
+          <label>File</label>
+          <input type="file" id="e-file" accept=".csv,.xlsx,.xls">
+        </div>
+        <div class="form-row">
+          <label>Format</label>
+          <select id="e-fmt">
+            <option value="csv" selected>csv</option>
+            <option value="xlsx">xlsx</option>
+            <option value="pdf">pdf</option>
+          </select>
+          <button class="btn primary" id="btn-export">Run /export/file (download)</button>
+        </div>
+        <pre class="output" id="out-export">No run yet.</pre>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <h2>Recent Requests (last 50)</h2>
+      <table>
+        <thead><tr><th>Time</th><th>Method</th><th>Endpoint</th><th>Domain</th><th class="value">Status</th><th class="value">ms</th></tr></thead>
+        <tbody id="req-table"><tr><td colspan="6" class="empty">No requests yet.</td></tr></tbody>
+      </table>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+const BASE = "";  // same-origin
+const REFRESH_MS = 5000;
+
+const $ = (id) => document.getElementById(id);
+const fmt = (v) => (v === null || v === undefined || v === "") ? "–" : v;
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+async function refreshStats() {
+  try {
+    const health = await fetch(BASE + "/health").then(r => r.json()).catch(() => null);
+    $("health").innerHTML = health && health.status === "ok"
+      ? '<span class="dot ok"></span>ok'
+      : '<span class="dot bad"></span>down';
+  } catch {
+    $("health").innerHTML = '<span class="dot bad"></span>down';
+  }
+
+  let s;
+  try { s = await fetch(BASE + "/stats").then(r => r.json()); }
+  catch { return; }
+
+  $("uptime").textContent = fmt(s.uptime_human);
+  $("total-requests").textContent = fmt(s.total_requests);
+  $("last-request").textContent = fmt(s.last_request);
+
+  // Performance
+  const perf = Object.entries(s.endpoint_avg_ms || {}).sort();
+  $("perf-table").innerHTML = perf.length
+    ? perf.map(([ep, ms]) => `<tr><td class="endpoint-cell">${esc(ep)}</td><td class="value">${ms}</td></tr>`).join("")
+    : `<tr><td colspan="2" class="empty">No requests yet.</td></tr>`;
+
+  // Domain usage
+  const doms = Object.entries(s.domain_counts || {}).sort((a, b) => b[1] - a[1]);
+  $("domain-table").innerHTML = doms.length
+    ? doms.map(([d, c]) => `<tr><td>${esc(d)}</td><td class="value">${c}</td></tr>`).join("")
+    : `<tr><td colspan="2" class="empty">No requests yet.</td></tr>`;
+
+  // Recent requests
+  const reqs = s.recent_requests || [];
+  $("req-table").innerHTML = reqs.length
+    ? reqs.map(r => {
+        const statusClass = r.status >= 500 ? "bad" : r.status >= 400 ? "warn" : "ok";
+        return `<tr>
+          <td>${esc(r.time)}</td>
+          <td>${esc(r.method)}</td>
+          <td class="endpoint-cell">${esc(r.endpoint)}</td>
+          <td>${esc(r.domain)}</td>
+          <td class="value"><span class="badge ${statusClass}">${r.status}</span></td>
+          <td class="value">${r.ms}</td>
+        </tr>`;
+      }).join("")
+    : `<tr><td colspan="6" class="empty">No requests yet.</td></tr>`;
+
+  // Errors
+  const errs = s.errors || [];
+  $("errors-table").innerHTML = errs.length
+    ? errs.map(e => `<tr><td>${esc(e.time)}</td><td class="endpoint-cell">${esc(e.endpoint)}</td><td style="color:var(--red)">${esc(e.message)}</td></tr>`).join("")
+    : `<tr><td colspan="3" class="empty">No errors.</td></tr>`;
+}
+
+// Tabs
+document.querySelectorAll(".tab").forEach(t => {
+  t.addEventListener("click", () => {
+    document.querySelectorAll(".tab").forEach(x => x.classList.remove("active"));
+    document.querySelectorAll(".tab-panel").forEach(x => x.classList.remove("active"));
+    t.classList.add("active");
+    $("panel-" + t.dataset.tab).classList.add("active");
+  });
+});
+
+function pretty(obj) {
+  try { return JSON.stringify(obj, null, 2); } catch { return String(obj); }
+}
+
+async function postForm(path, formData, outId) {
+  $(outId).textContent = "Running…";
+  try {
+    const r = await fetch(BASE + path, { method: "POST", body: formData });
+    const text = await r.text();
+    let body;
+    try { body = JSON.parse(text); } catch { body = text; }
+    if (!r.ok) {
+      $(outId).textContent = `HTTP ${r.status}\n` + (typeof body === "string" ? body : pretty(body));
+    } else {
+      $(outId).textContent = typeof body === "string" ? body : pretty(body);
+    }
+  } catch (e) {
+    $(outId).textContent = "Error: " + e.message;
+  } finally {
+    refreshStats();
+  }
+}
+
+$("btn-validate").addEventListener("click", () => {
+  const f = $("v-file").files[0];
+  if (!f) { $("out-validate").textContent = "Pick a file first."; return; }
+  const fd = new FormData(); fd.append("file", f); fd.append("domain", $("v-domain").value);
+  postForm("/validation/validate", fd, "out-validate");
+});
+
+let lastWorksheetRows = null;
+
+function csvEscape(v) {
+  if (v === null || v === undefined) return "";
+  const s = String(v);
+  return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+}
+
+function toCSV(rows) {
+  if (!rows || !rows.length) return "";
+  const cols = ["row", "field", "original", "correction", "severity", "priority", "message", "fix", "notes"];
+  const header = cols.join(",");
+  const lines = rows.map(r => cols.map(c => csvEscape(r[c])).join(","));
+  return header + "\n" + lines.join("\n") + "\n";
+}
+
+function downloadFile(filename, content, mime) {
+  const blob = new Blob([content], { type: mime + ";charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+}
+
+$("btn-worksheet").addEventListener("click", async () => {
+  const f = $("w-file").files[0];
+  if (!f) { $("out-worksheet").textContent = "Pick a file first."; return; }
+  $("out-worksheet").textContent = "Running…";
+  $("btn-dl-worksheet").disabled = true;
+  lastWorksheetRows = null;
+  try {
+    const fd = new FormData(); fd.append("file", f); fd.append("domain", $("w-domain").value);
+    const r = await fetch(BASE + "/validation/worksheet", { method: "POST", body: fd });
+    const text = await r.text();
+    let body;
+    try { body = JSON.parse(text); } catch { body = text; }
+    if (!r.ok) {
+      $("out-worksheet").textContent = `HTTP ${r.status}\n` + (typeof body === "string" ? body : pretty(body));
+    } else {
+      $("out-worksheet").textContent = pretty(body);
+      if (body && Array.isArray(body.worksheet) && body.worksheet.length) {
+        lastWorksheetRows = body.worksheet;
+        $("btn-dl-worksheet").disabled = false;
+      }
+    }
+  } catch (e) {
+    $("out-worksheet").textContent = "Error: " + e.message;
+  } finally {
+    refreshStats();
+  }
+});
+
+$("btn-dl-worksheet").addEventListener("click", () => {
+  if (!lastWorksheetRows) return;
+  downloadFile("worksheet.csv", toCSV(lastWorksheetRows), "text/csv");
+});
+
+$("btn-correct").addEventListener("click", () => {
+  const o = $("c-orig").files[0]; const w = $("c-ws").files[0];
+  if (!o || !w) { $("out-correct").textContent = "Pick both files."; return; }
+  const fd = new FormData();
+  fd.append("original_file", o); fd.append("worksheet_file", w); fd.append("domain", $("c-domain").value);
+  postForm("/correction/apply", fd, "out-correct");
+});
+
+$("btn-export").addEventListener("click", async () => {
+  const f = $("e-file").files[0];
+  if (!f) { $("out-export").textContent = "Pick a file first."; return; }
+  const fmtSel = $("e-fmt").value;
+  $("out-export").textContent = "Running…";
+  try {
+    const fd = new FormData();
+    fd.append("corrected_file", f); fd.append("fmt", fmtSel);
+    const r = await fetch(BASE + "/export/file", { method: "POST", body: fd });
+    if (!r.ok) {
+      $("out-export").textContent = `HTTP ${r.status}\n` + await r.text();
+    } else {
+      const blob = await r.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = "corrected." + fmtSel;
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+      $("out-export").textContent = `Downloaded corrected.${fmtSel} (${blob.size} bytes)`;
+    }
+  } catch (e) {
+    $("out-export").textContent = "Error: " + e.message;
+  } finally {
+    refreshStats();
+  }
+});
+
+$("btn-refresh").addEventListener("click", refreshStats);
+
+refreshStats();
+setInterval(refreshStats, REFRESH_MS);
+</script>
+
+</body>
+</html>

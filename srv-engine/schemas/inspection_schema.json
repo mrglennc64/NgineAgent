@@ -1,0 +1,52 @@
+{
+  "domain": "inspection",
+  "description": "Building-inspection protocol finding — modeled on the besiktning app's CaseDoc/Finding/SkickBedomning types (Swedish besiktningsprotokoll). One row = one finding (notering) within a protocol. Photo/vision transcription + PDF generation live in the besiktning app; the engine validates the finding rows.",
+  "required": [
+    "protocol_id",
+    "notering_id",
+    "section",
+    "condition"
+  ],
+  "fields": {
+    "protocol_id": {
+      "severity": "HIGH"
+    },
+    "notering_id": {
+      "severity": "HIGH"
+    },
+    "section": {
+      "severity": "MEDIUM"
+    },
+    "condition": {
+      "pattern": "^(under_normalt|normalt|over_normalt)$",
+      "severity": "HIGH",
+      "pattern_message": "condition (skickbedömning) must be under_normalt, normalt, or over_normalt"
+    },
+    "inspector": {
+      "severity": "LOW"
+    },
+    "inspection_date": {
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+      "severity": "MEDIUM",
+      "pattern_message": "inspection_date (besiktningsdag) must be YYYY-MM-DD"
+    },
+    "property_address": {
+      "severity": "LOW"
+    },
+    "ai_match_confidence": {
+      "pattern": "^(1(\\.0+)?|0(\\.\\d+)?)$",
+      "severity": "LOW",
+      "pattern_message": "ai_match_confidence must be a float between 0 and 1"
+    },
+    "validated_by_user": {
+      "pattern": "^([Tt]rue|[Ff]alse)$",
+      "severity": "MEDIUM",
+      "pattern_message": "validated_by_user must be true or false"
+    },
+    "photo_count": {
+      "pattern": "^\\d+$",
+      "severity": "LOW",
+      "pattern_message": "photo_count must be a non-negative integer"
+    }
+  }
+}

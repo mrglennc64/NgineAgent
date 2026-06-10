@@ -1,0 +1,37 @@
+{
+  "domain": "music",
+  "description": "Music catalog row. Required identifiers and metadata for royalty validation.",
+  "required": ["title", "artist", "isrc"],
+  "fields": {
+    "isrc": {
+      "pattern": "^[A-Z]{2}[A-Z0-9]{3}\\d{7}$",
+      "severity": "HIGH",
+      "pattern_message": "ISRC must be 12 chars: 2-letter country + 3 alphanumeric + 7 digits (e.g. USRC12345678)"
+    },
+    "iswc": {
+      "pattern": "^T-?\\d{3}\\.?\\d{3}\\.?\\d{3}-?\\d$",
+      "severity": "MEDIUM",
+      "pattern_message": "ISWC must follow T-XXX.XXX.XXX-C format"
+    },
+    "ipi": {
+      "pattern": "^\\d{9,11}$",
+      "severity": "MEDIUM",
+      "pattern_message": "IPI must be 9-11 digits"
+    },
+    "isni": {
+      "pattern": "^\\d{15}[\\dX]$",
+      "severity": "LOW",
+      "pattern_message": "ISNI must be 16 chars (15 digits + checksum)"
+    },
+    "duration_seconds": {
+      "severity": "LOW"
+    },
+    "release_date": {
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+      "severity": "LOW",
+      "pattern_message": "release_date must be YYYY-MM-DD"
+    }
+  },
+  "identifiers": ["isrc", "iswc", "ipi", "isni"],
+  "revenue_critical_fields": ["isrc", "iswc", "ipi"]
+}

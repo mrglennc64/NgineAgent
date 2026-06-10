@@ -13,6 +13,7 @@ router = APIRouter()
 async def export_endpoint(
     corrected_file: UploadFile = File(...),
     fmt: str = Form("csv"),
+    domain: str = Form(None),
 ):
     content = await corrected_file.read()
     name = (corrected_file.filename or "").lower()
@@ -24,7 +25,7 @@ async def export_endpoint(
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Could not parse {corrected_file.filename}: {e}")
 
-    data = export_corrected(df, fmt=fmt)
+    data = export_corrected(df, fmt=fmt, domain=domain)
     return Response(
         content=data,
         media_type=media_type_for(fmt),

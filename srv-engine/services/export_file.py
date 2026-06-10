@@ -5,12 +5,12 @@ from core.exporters.xlsx_exporter import export_xlsx
 from core.exporters.pdf_exporter import export_pdf
 
 
-def export_corrected(df: pd.DataFrame, fmt: str = "csv") -> bytes:
+def export_corrected(df: pd.DataFrame, fmt: str = "csv", domain: str | None = None) -> bytes:
     fmt = (fmt or "csv").lower()
     if fmt in ("xlsx", "excel"):
         return export_xlsx(df)
     if fmt == "pdf":
-        return export_pdf(df)
+        return export_pdf(df, domain=domain)
     return export_csv(df)
 
 

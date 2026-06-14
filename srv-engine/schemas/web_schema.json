@@ -1,0 +1,62 @@
+{
+  "domain": "web",
+  "version": "2026.06.2",
+  "description": "Web Assessment scan-finding row — 'five agencies in one' (CRO, SEO, funnel, email, social) on one weekly cadence. Modeled on the comms/CIP channel-finding shape: one row = one channel finding from a web-surface scan. Structural + format validation; scan execution + scoring + ready-to-post content live in the assessment application layer.",
+  "required": [
+    "run_id",
+    "url",
+    "channel",
+    "severity",
+    "label"
+  ],
+  "fields": {
+    "run_id": {
+      "severity": "HIGH"
+    },
+    "url": {
+      "pattern": "^https?://[^\\s]+$",
+      "severity": "HIGH",
+      "pattern_message": "url must start with http:// or https://",
+      "fix": "Serve the surface over https:// (or http://) - other schemes are not scannable."
+    },
+    "hostname": {
+      "severity": "LOW"
+    },
+    "customer": {
+      "severity": "LOW"
+    },
+    "plan": {
+      "pattern": "^(Starter|Standard|Professional)$",
+      "severity": "LOW",
+      "pattern_message": "plan must be Starter, Standard, or Professional",
+      "fix": "Use one of: Starter, Standard, Professional."
+    },
+    "channel": {
+      "pattern": "^(cro|seo|funnel|email|social)$",
+      "severity": "HIGH",
+      "pattern_message": "channel must be one of: cro, seo, funnel, email, social",
+      "fix": "Map to the closest Web Assessment channel: cro, seo, funnel, email, social (e.g. payment-flow -> cro, deliverability -> email)."
+    },
+    "severity": {
+      "pattern": "^(ok|warn|issue)$",
+      "severity": "HIGH",
+      "pattern_message": "finding severity must be ok, warn, or issue",
+      "fix": "Map to the scale: ok, warn or issue (e.g. critical -> issue)."
+    },
+    "status": {
+      "pattern": "^(pending|running|done|failed)$",
+      "severity": "LOW",
+      "pattern_message": "job status must be pending, running, done, or failed",
+      "fix": "Use one of: pending, running, done, failed."
+    },
+    "score": {
+      "pattern": "^(100|[1-9]?[0-9])$",
+      "severity": "MEDIUM",
+      "pattern_message": "score must be an integer 0-100",
+      "fix": "Clamp to an integer 0-100."
+    },
+    "label": {
+      "severity": "MEDIUM"
+    }
+  }
+}

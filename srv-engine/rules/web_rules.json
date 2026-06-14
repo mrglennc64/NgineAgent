@@ -1,0 +1,28 @@
+{
+  "domain": "web",
+  "version": "2026.06.2",
+  "description": "Web Assessment domain rules — 'five agencies in one, one weekly report'. Channel weighting + finding-severity penalties across the five capability channels (CRO, SEO, funnel, email, social). Modeled on the comms/CIP scan model; consumed alongside web_schema.json.",
+  "penalties": {
+    "issue": 25,
+    "warn": 10,
+    "ok": 0
+  },
+  "thresholds": {
+    "healthy_score": 90,
+    "at_risk_score": 70
+  },
+  "channel_weights": {
+    "cro": 0.28,
+    "seo": 0.22,
+    "funnel": 0.20,
+    "email": 0.18,
+    "social": 0.12
+  },
+  "channel_labels": {
+    "cro": "CRO & Payment Flows",
+    "seo": "SEO, Content & UX",
+    "funnel": "Funnel & Pam Automation",
+    "email": "Email, Site & Content Review",
+    "social": "Social — Ready-to-Post"
+  }
+}

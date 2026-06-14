@@ -142,6 +142,34 @@
   .severity-LOW { color: var(--muted); }
   .severity-INFO { color: var(--blue); }
   .endpoint-cell { color: var(--blue); }
+
+  /* ── studio meters (master bus + channel strips) ───────────────────── */
+  .meters { margin-top: 10px; display: none; }
+  .master {
+    display: flex; align-items: center; gap: 14px;
+    padding: 10px 14px; border: 1px solid var(--border); border-radius: 10px;
+    background: #fff; margin-bottom: 10px;
+  }
+  .master .score { font-size: 26px; font-weight: 800; line-height: 1; }
+  .master .score-label { font-size: 9px; color: var(--muted); letter-spacing: .07em; margin-top: 3px; }
+  .mbar {
+    flex: 1; height: 10px; border-radius: 999px; position: relative;
+    border: 1px solid var(--border);
+    background: linear-gradient(90deg, #f6d7d6 0 60%, #f8e8cd 60% 80%, #d9f0e3 80% 100%);
+  }
+  .mbar .tick { position: absolute; top: -4px; width: 2px; height: 16px; background: var(--accent); border-radius: 1px; }
+  .strip-row { display: flex; align-items: center; gap: 8px; padding: 3px 0; font-size: 11px; }
+  .strip-row .nm {
+    width: 120px; font-family: var(--mono); color: var(--muted); text-align: right;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .sbar { flex: 1; height: 8px; border-radius: 999px; background: #eef2f3; overflow: hidden; display: flex; }
+  .sbar i { display: block; height: 100%; }
+  .sbar .h { background: var(--red); }
+  .sbar .m { background: var(--yellow); }
+  .sbar .l { background: var(--blue); }
+  .sbar .ok { background: var(--green); }
+  .strip-row .ct { width: 52px; font-family: var(--mono); color: var(--muted); }
 </style>
 </head>
 <body>
@@ -149,10 +177,12 @@
 <header>
   <h1 style="display:flex;align-items:center;gap:10px">
     <span style="width:26px;height:26px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#7fe6d3,var(--teal) 55%,#0b6f5e);box-shadow:0 2px 6px rgba(15,184,156,.3)"></span>
-    Engine Dashboard
+    Studio Console
   </h1>
   <div class="meta">
     <span id="auto-refresh-status">auto-refresh: on (5s)</span>
+    &nbsp;·&nbsp;
+    <a href="/pitch.pdf" target="_blank" style="color:var(--blue);text-decoration:none">engine reference</a>
     &nbsp;·&nbsp;
     <a href="/docs" target="_blank" style="color:var(--blue);text-decoration:none">/docs</a>
     &nbsp;·&nbsp;
@@ -205,12 +235,12 @@
   <div>
 
     <div class="card">
-      <h2>Try It</h2>
+      <h2>Transport — Try It</h2>
       <div class="tabs">
-        <div class="tab active" data-tab="validate">Validate</div>
-        <div class="tab" data-tab="worksheet">Worksheet</div>
-        <div class="tab" data-tab="correct">Correct</div>
-        <div class="tab" data-tab="export">Export</div>
+        <div class="tab active" data-tab="validate">▶ Validate · Console</div>
+        <div class="tab" data-tab="worksheet">Worksheet · Mix</div>
+        <div class="tab" data-tab="correct">Correct · Rack</div>
+        <div class="tab" data-tab="export">⏏ Export · Bounce</div>
       </div>
 
       <div class="tab-panel active" id="panel-validate">
@@ -226,11 +256,14 @@
             <option value="comms">comms</option>
             <option value="accounting">accounting</option>
             <option value="inspection">inspection</option>
+            <option value="web">web</option>
             <option value="invoice">invoice</option>
             <option value="base">base</option>
           </select>
           <button class="btn primary" id="btn-validate">Run /validation/validate</button>
+          <button class="btn" id="btn-report" disabled>Download report.pdf</button>
         </div>
+        <div class="meters" id="meters"></div>
         <pre class="output" id="out-validate">No run yet.</pre>
       </div>
 
@@ -247,6 +280,7 @@
             <option value="comms">comms</option>
             <option value="accounting">accounting</option>
             <option value="inspection">inspection</option>
+            <option value="web">web</option>
             <option value="invoice">invoice</option>
             <option value="base">base</option>
           </select>
@@ -273,6 +307,7 @@
             <option value="comms">comms</option>
             <option value="accounting">accounting</option>
             <option value="inspection">inspection</option>
+            <option value="web">web</option>
             <option value="invoice">invoice</option>
             <option value="base">base</option>
           </select>
@@ -405,11 +440,87 @@ async function postForm(path, formData, outId) {
   }
 }
 
-$("btn-validate").addEventListener("click", () => {
+// ── studio meters: master bus score + per-field channel strips ──────────
+function renderMeters(body) {
+  const el = $("meters");
+  if (!body || !Array.isArray(body.issues)) { el.style.display = "none"; el.innerHTML = ""; return; }
+  const issues = body.issues.filter(i => i.severity !== "INFO" && i.field !== "__health__");
+  let H = 0, M = 0, L = 0; const by = {};
+  issues.forEach(i => {
+    const k = i.severity === "HIGH" ? "H" : i.severity === "MEDIUM" ? "M" : "L";
+    if (k === "H") H++; else if (k === "M") M++; else L++;
+    const f = i.field || "—";
+    by[f] = by[f] || { H: 0, M: 0, L: 0, t: 0 };
+    by[f][k]++; by[f].t++;
+  });
+  const score = Math.max(0, Math.min(100, 100 - 6 * H - (M + L)));
+  const status = (score >= 90 && H === 0) ? "HEALTHY" : score >= 70 ? "ACTION REQUIRED" : "CRITICAL";
+  const color = (score >= 90 && H === 0) ? "var(--green)" : score >= 70 ? "var(--yellow)" : "var(--red)";
+  const maxT = Math.max(1, ...Object.values(by).map(g => g.t));
+  const strips = Object.entries(by).sort((a, b) => b[1].t - a[1].t).map(([f, g]) => {
+    const w = k => (g[k] / maxT * 100).toFixed(1) + "%";
+    return `<div class="strip-row"><span class="nm" title="${esc(f)}">${esc(f)}</span>` +
+      `<span class="sbar"><i class="h" style="width:${w("H")}"></i><i class="m" style="width:${w("M")}"></i><i class="l" style="width:${w("L")}"></i></span>` +
+      `<span class="ct">${g.t} hit${g.t > 1 ? "s" : ""}</span></div>`;
+  }).join("") ||
+    `<div class="strip-row"><span class="nm">all channels</span><span class="sbar"><i class="ok" style="width:100%"></i></span><span class="ct">clean</span></div>`;
+  el.innerHTML =
+    `<div class="master"><div><div class="score" style="color:${color}">${score}</div>` +
+    `<div class="score-label">MASTER BUS · ${status}</div></div>` +
+    `<div class="mbar"><span class="tick" style="left:calc(${score}% - 1px)"></span></div></div>` + strips;
+  el.style.display = "block";
+}
+
+let lastValidateFile = null;
+
+$("btn-validate").addEventListener("click", async () => {
   const f = $("v-file").files[0];
   if (!f) { $("out-validate").textContent = "Pick a file first."; return; }
   const fd = new FormData(); fd.append("file", f); fd.append("domain", $("v-domain").value);
-  postForm("/validation/validate", fd, "out-validate");
+  $("out-validate").textContent = "Running…";
+  renderMeters(null);
+  $("btn-report").disabled = true;
+  lastValidateFile = null;
+  try {
+    const r = await fetch(BASE + "/validation/validate", { method: "POST", body: fd });
+    const text = await r.text();
+    let body;
+    try { body = JSON.parse(text); } catch { body = text; }
+    if (!r.ok) {
+      $("out-validate").textContent = `HTTP ${r.status}\n` + (typeof body === "string" ? body : pretty(body));
+    } else {
+      $("out-validate").textContent = pretty(body);
+      renderMeters(body);
+      lastValidateFile = f;
+      $("btn-report").disabled = false;
+    }
+  } catch (e) {
+    $("out-validate").textContent = "Error: " + e.message;
+  } finally {
+    refreshStats();
+  }
+});
+
+$("btn-report").addEventListener("click", async () => {
+  if (!lastValidateFile) return;
+  const fd = new FormData();
+  fd.append("file", lastValidateFile); fd.append("domain", $("v-domain").value);
+  $("btn-report").disabled = true;
+  try {
+    const r = await fetch(BASE + "/validation/report", { method: "POST", body: fd });
+    if (!r.ok) { $("out-validate").textContent = `HTTP ${r.status}\n` + await r.text(); return; }
+    const blob = await r.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = "validation-report.pdf";
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  } catch (e) {
+    $("out-validate").textContent = "Error: " + e.message;
+  } finally {
+    $("btn-report").disabled = false;
+    refreshStats();
+  }
 });
 
 let lastWorksheetRows = null;

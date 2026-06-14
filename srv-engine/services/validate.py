@@ -7,7 +7,9 @@ from core.validators.base_validator import BaseValidator
 from core.validators.music_validator import MusicValidator
 
 
-Domain = Literal["music", "healthcare", "invoice", "payroll", "base"]
+Domain = Literal[
+    "music", "healthcare", "comms", "accounting", "inspection", "web", "invoice", "base"
+]
 
 
 def get_validator(domain: str, schema: dict, rules: dict) -> BaseValidator:

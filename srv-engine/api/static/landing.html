@@ -39,13 +39,33 @@
   }
   .cta:hover { transform: translateY(-1px); box-shadow: 0 10px 24px rgba(11,140,119,.34); }
   .cta svg { width: 18px; height: 18px; }
+  .cta-secondary {
+    display: inline-flex; align-items: center; gap: 6px; margin-left: 18px;
+    color: var(--teal-tx); text-decoration: none; font-size: 14px; font-weight: 700;
+  }
+  .cta-secondary:hover { text-decoration: underline; }
   .cta-note { color: var(--muted); font-size: 13px; margin-top: 14px; font-family: var(--mono); }
-  .strip { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-top: 64px; }
+  .chain { display: flex; align-items: stretch; gap: 10px; margin-top: 56px; }
+  .stage { flex: 1; background: #fff; border: 1px solid var(--border); border-radius: 12px;
+    border-top: 3px solid var(--teal); padding: 14px 12px; text-align: center;
+    box-shadow: 0 1px 3px rgba(16,40,46,.04); }
+  .stage .s { font-size: 10px; font-weight: 800; letter-spacing: .08em; color: var(--teal-tx);
+    text-transform: uppercase; }
+  .stage .t { font-size: 14px; font-weight: 700; margin-top: 4px; }
+  .stage .d { font-size: 11px; color: var(--muted); margin-top: 4px; line-height: 1.35; }
+  .chain .arrow { align-self: center; color: var(--teal-tx); font-size: 20px; font-weight: 800; }
+  .strip-label { margin-top: 40px; font-size: 11px; font-weight: 800; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--muted); }
+  .strip { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-top: 12px; }
   .chip { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 16px 14px;
     box-shadow: 0 1px 3px rgba(16,40,46,.04); }
   .chip .n { font-size: 13px; font-weight: 700; color: var(--ink); }
   .chip .d { font-size: 11px; color: var(--muted); margin-top: 4px; line-height: 1.35; }
-  @media (max-width: 820px) { .strip { grid-template-columns: repeat(2, 1fr); } h1 { font-size: 40px; } }
+  @media (max-width: 820px) {
+    .strip { grid-template-columns: repeat(2, 1fr); } h1 { font-size: 40px; }
+    .chain { flex-direction: column; }
+    .chain .arrow { transform: rotate(90deg); }
+  }
   footer { color: var(--muted); font-size: 12px; padding: 22px 0; border-top: 1px solid var(--border); }
 </style>
 </head>
@@ -57,27 +77,40 @@
     </header>
 
     <main>
-      <div class="eyebrow">Validation &amp; Correction Engine</div>
-      <h1>One engine that makes your data <em>provably correct</em>.</h1>
+      <div class="eyebrow">The Mastering Studio for Data</div>
+      <h1>Press play on <em>provably correct</em> data.</h1>
       <p class="sub">The metadata compliance engine behind CIP, DIP, HeyRoya and Kataloghub —
-        now exposed as five validated verticals with live telemetry, an HTTP API, and an
-        instrumented run-report. Upload a file and watch it validate in real time.</p>
+        a studio-grade signal chain for catalogs. Load the raw take, scan it on the console,
+        run it through the correction rack, and bounce a procurement-ready master.</p>
 
       <div class="cta-row">
         <a class="cta" href="/dashboard">
-          Open the live dashboard
+          Open the studio
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
                stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
         </a>
-        <div class="cta-note">Real engine · live stats · 5 domains</div>
+        <a class="cta-secondary" href="/pitch.pdf" target="_blank">Engine reference (PDF) →</a>
+        <div class="cta-note">Real engine · live stats · 6 domain presets</div>
       </div>
 
+      <div class="chain">
+        <div class="stage"><div class="s">Raw take</div><div class="t">Upload</div><div class="d">CSV / XLSX catalog, as recorded</div></div>
+        <span class="arrow">→</span>
+        <div class="stage"><div class="s">Console</div><div class="t">Validate</div><div class="d">every field gets a channel strip</div></div>
+        <span class="arrow">→</span>
+        <div class="stage"><div class="s">Rack</div><div class="t">Correct</div><div class="d">deterministic fixes, like plugins</div></div>
+        <span class="arrow">→</span>
+        <div class="stage"><div class="s">Master</div><div class="t">Bounce</div><div class="d">CSV · XLSX · branded PDF</div></div>
+      </div>
+
+      <div class="strip-label">Presets</div>
       <div class="strip">
         <div class="chip"><div class="n">Music</div><div class="d">ISRC / ISWC / IPI, royalty gaps, §507(b)</div></div>
         <div class="chip"><div class="n">Healthcare</div><div class="d">Claim denials — CARC/RARC, NPI, CPT</div></div>
         <div class="chip"><div class="n">Comms</div><div class="d">CIP — 9 diagnostic channels, scoring</div></div>
         <div class="chip"><div class="n">Accounting</div><div class="d">SIE/BAS ledger, vouchers, VAT</div></div>
         <div class="chip"><div class="n">Inspection</div><div class="d">Besiktning protocols, condition scale</div></div>
+        <div class="chip"><div class="n">Web</div><div class="d">5 channels — CRO, SEO, funnel, email, social</div></div>
       </div>
     </main>
 
